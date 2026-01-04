@@ -872,7 +872,14 @@ document.addEventListener('DOMContentLoaded', function(){
   // adapt width initial
   document.querySelectorAll("#km,#denivele").forEach(el=>ajusterLargeur(el));
 });
+function resizeCanvasToScreen() {
+  const canvas = document.getElementById("elevationChart");
+  if (!canvas) return;
 
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight || 300;
+}
 /* --- utilitaires pour le résumé --- */
 function getNomRando(){ const select = document.getElementById('nom'); const autre = document.getElementById('autreNomRando'); return (select && select.value==='autre') ? (autre ? autre.value.trim() : '') : (select ? select.value : (document.getElementById('rechercheRando').value || '')); }
 function getValeurOuRouge(elementId, isText=false){ const el=document.getElementById(elementId); const valeur = el ? (isText ? el.textContent : el.value) : ''; return (valeur && String(valeur).trim()) ? valeur : '<span style="color:red">Non renseigné</span>'; }
@@ -1004,31 +1011,52 @@ function validerNumerique(id){
   if(valeur==="" || isNaN(valeur)){ messageErreur.textContent = "Valeurs numériques uniquement"; messageErreur.style.display = "block"; } else { messageErreur.style.display = "none"; }
 }
 
-function envoyerEmail() {
+
+function getCanvasBase64() {
+  const canvas = document.getElementById("elevationChart");
+  if (!canvas || canvas.width === 0 || canvas.height === 0) {
+    return null;
+  }
+  return canvas.toDataURL("image/png");
+}
+
+async function envoyerEmail() {
   const date = document.getElementById("date").value || "";
-  const dateFormatted = date ? new Date(date).toLocaleDateString("fr-FR") : "";
+  const dateFormatted = date
+    ? new Date(date).toLocaleDateString("fr-FR")
+    : "";
+
   const jour = document.getElementById("jour-semaine").textContent || "";
   const lieu = getNomRando() || "Non renseigné";
-  // const resume = document.getElementById("resultat").textContent || "";
   const resume = document.getElementById("resultat").innerText || "";
 
-  const messageIntro =
-    "Bonjour La Marmotte,%0D%0A%0D%0AVoici ma feuille de route.%0D%0A%0D%0ACordialement.%0D%0A%0D%0A";
+  const sujet = `${jour} ${dateFormatted} ${lieu}`;
 
-  const sujet = encodeURIComponent(`${jour} ${dateFormatted} ${lieu}`);
-  const body = encodeURIComponent(resume);
-  const mailtoLink = `mailto:contact@lamarmottechateaurenard.com,lamarmotterando@gmail.com?subject=${sujet}&body=${messageIntro}${body}`;
+  const corpsMail =
+    "Bonjour La Marmotte,\n\n" +
+    "Voici ma feuille de route.\n\n" +
+    resume +
+    "\n\nCordialement.";
 
-  // Création d’un lien invisible pour forcer l’exécution sur mobile
-  const a = document.createElement("a");
-  a.href = mailtoLink;
-  a.style.display = "none";
-  document.body.appendChild(a);
-
-  // Clic programmatique immédiatement déclenché après interaction utilisateur
-  a.click();
-  document.body.removeChild(a);
+  const image = getCanvasBase64();
+if (!image) {
+  alert("La courbe n’est pas encore prête. Générez le profil avant l’envoi.");
+  return;
 }
+
+  await fetch("/api/send-mail", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sujet,
+      message: corpsMail,
+      image
+    })
+  });
+
+  alert("Mail envoyé avec la courbe en pièce jointe ✅");
+}
+
 
 </script>
 
@@ -1817,8 +1845,7 @@ document.getElementById("exportProfilJPG").addEventListener("click", function ()
 <script>
 window.addEventListener("resize", () => {
   if (elevationChartInstance) {
-    resizeCanvasToScreen();
-    elevationChartInstance.update();
+        elevationChartInstance.update();
   }
 });
 </script>
