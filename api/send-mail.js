@@ -32,8 +32,9 @@ export default async function handler(req, res) {
 
     // Envoi du mail
     await transporter.sendMail({
-      from: `"Profil altimétrique" <${process.env.MAIL_USER}>`,
-      to: process.env.MAIL_USER, // ou autre destinataire
+      from: `"Web La Marmotte" <${process.env.MAIL_USER}>`,
+      to: "contact@lamarmottechateaurenard.com",
+      cc: "lamarmotterando@gmail.com",
       subject: subject || "Profil altimétrique",
       text: message || "Voir pièce jointe",
       attachments: [
