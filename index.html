@@ -1045,14 +1045,15 @@ if (!image) {
 }
 
   await fetch("/api/send-mail", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      sujet,
-      message: corpsMail,
-      image
-    })
-  });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    subject: sujet,
+    message: corpsMail,
+    imageBase64: image
+  })
+});
+
 
   alert("Mail envoyé avec la courbe en pièce jointe ✅");
 }
