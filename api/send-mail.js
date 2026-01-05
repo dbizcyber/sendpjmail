@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     await resend.emails.send({
       from: "Rando <onboarding@resend.dev>", // temporaire
-      to: ["contact@tonsite.fr"],            // DESTINATAIRE
+      to: ["lamarmotterando@gmail.com"],            // DESTINATAIRE
       subject: subject || "Profil altimétrique",
       text: message || "Voir pièce jointe",
       attachments: [
