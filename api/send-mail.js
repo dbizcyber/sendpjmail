@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     await resend.emails.send({
       from: "Profil altimétrique <onboarding@resend.dev>",
-      to: ["lamarmotterando@gmail.com"],
+      to: ["dbizard@gmail.com"],
       subject: subject || "Profil altimétrique",
       text: message || "Voir pièce jointe",
       attachments: [
