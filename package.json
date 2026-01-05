@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "dependencies": {
-    "nodemailer": "^6.9.8"
-  }
+ "dependencies": {
+  "resend": "^3.2.0"
+}
 }
