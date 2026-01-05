@@ -21,7 +21,10 @@ export default async function handler(req, res) {
 
     await resend.emails.send({
       from: "Profil altimétrique <contact@lamarmottechateaurenard.com>",
-      to: ["dbizard@gmail.com"],
+      to: ["contact@lamarmottechateaurenard.com"], // destinataire principal
+       bcc: [
+    "lamarmotterando@gmail.com"
+     ],
       subject: subject || "Profil altimétrique",
       text: message || "Voir pièce jointe",
       attachments: [
