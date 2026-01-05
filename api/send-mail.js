@@ -24,12 +24,14 @@ export default async function handler(req, res) {
       to: ["lamarmotterando@gmail.com"],            // DESTINATAIRE
       subject: subject || "Profil altimétrique",
       text: message || "Voir pièce jointe",
-      attachments: [
-        {
-          filename: "profil-altimetrique.png",
-          content: base64Data
-        }
-      ]
+     attachments: [
+  {
+    filename: "profil-altimetrique.png",
+    content: base64Data,
+    encoding: "base64"
+  }
+]
+
     });
 
     return res.status(200).json({ success: true });
