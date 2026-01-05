@@ -20,23 +20,22 @@ export default async function handler(req, res) {
     );
 
     await resend.emails.send({
-      from: "Rando <onboarding@resend.dev>", // temporaire
-      to: ["lamarmotterando@gmail.com"],            // DESTINATAIRE
+      from: "Profil altimétrique <onboarding@resend.dev>",
+      to: ["contact@tonsite.fr"],
       subject: subject || "Profil altimétrique",
       text: message || "Voir pièce jointe",
-     attachments: [
-  {
-    filename: "profil-altimetrique.png",
-    content: base64Data,
-    encoding: "base64"
-  }
-]
-
+      attachments: [
+        {
+          filename: "profil-altimetrique.png",
+          content: base64Data,
+          encoding: "base64"
+        }
+      ]
     });
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
+    console.error("RESEND ERROR:", error);
     return res.status(500).json({ error: "Mail sending failed" });
   }
 }
