@@ -661,14 +661,14 @@ label.small-label {
 <div class="bloc-champ">
   <label for="technicite">Technicité (1-5) :</label>
   <input type="number" id="technicite" oninput="validerChamp('technicite'); afficherDifficulte('technicite','technicite-label');" min="1" max="5">
-  <p><strong>Technicité : <span id="technicite-label">Non renseigné</span></strong></p>
+  <p><strong>Technicité : <span id="technicite-label">❌ Non renseigné</span></strong></p>
   <p id="technicite-erreur" class="message-erreur">Veuillez entrer une valeur entre 1 et 5.</p>
 </div>
 
 <div class="bloc-champ">
   <label for="risque">Risque (1-5) :</label>
   <input type="number" id="risque" oninput="validerChamp('risque'); afficherRisque('risque','risque-label');" min="1" max="5">
-  <p><strong>Risque : <span id="risque-label">Non renseigné</span></strong></p>
+  <p><strong>Risque : <span id="risque-label">❌ Non renseigné</span></strong></p>
   <p id="risque-erreur" class="message-erreur">Veuillez entrer une valeur entre 1 et 5.</p>
 </div>
 
@@ -729,7 +729,7 @@ label.small-label {
   <option value="TEST 06 01 02 03 04">TEST 06 01 02 03 04</option>
   <!-- Ajoute la liste complète si besoin -->
 </select>
-<p>Organisateur : <span id="organisateur-label">Non renseigné</span></p>
+<p>Organisateur : <span id="organisateur-label">❌ Non renseigné</span></p>
 
 <hr>
 <!-- Bouton unique -->
