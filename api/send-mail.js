@@ -19,22 +19,29 @@ export default async function handler(req, res) {
       ""
     );
 
-    await resend.emails.send({
-      from: "Profil altimétrique <contact@lamarmottechateaurenard.com>",
-      to: ["contact@lamarmottechateaurenard.com"], // destinataire principal
-       bcc: [
-    "lamarmotterando@gmail.com"
-     ],
-      subject: subject || "Profil altimétrique",
-      text: message || "Voir pièce jointe",
-      attachments: [
-        {
-          filename: "profil-altimetrique.png",
-          content: base64Data,
-          encoding: "base64"
-        }
-      ]
-    });
+ const { subject, message, imageBase64, emailUtilisateur } = req.body;
+
+await resend.emails.send({
+  from: "Profil altimétrique <contact@lamarmottechateaurenard.com>",
+  to: ["contact@lamarmottechateaurenard.com"],
+  bcc: [
+    "lamarmotterando@gmail.com",
+    ...(emailUtilisateur ? [emailUtilisateur] : [])
+  ],
+  subject: subject || "Profil altimétrique",
+  text: message || "Voir pièce jointe",
+  attachments: [
+    {
+      filename: "profil-altimetrique.png",
+      content: base64Data,
+      encoding: "base64"
+    }
+  ]
+});
+if (emailUtilisateur && !emailUtilisateur.includes("@")) {
+  return res.status(400).json({ error: "Invalid email" });
+}
+
 
     return res.status(200).json({ success: true });
   } catch (error) {
