@@ -1031,7 +1031,8 @@ function getCanvasBase64WithFooter() {
   const rando = typeof getNomRando === "function"
     ? getNomRando()
     : "Randonnée";
-  
+  const organisateur =
+  document.getElementById("organisateur")?.value?.trim() || "";
   const footerText = `${rando} — ${dateFormatted} — ${organisateur}`;
   const footerHeight = 50;
 
