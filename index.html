@@ -735,7 +735,7 @@ label.small-label {
 <!-- Bouton unique -->
 <button id="btn-generer" type="button">1-Générer le résumé</button>
 <br><br>
-<span style="color:red; font-weight:bold;">PAS DE PDF SVP, SI VOUS AVEZ TÉLÉCHARGÉ LE GPX DE VOTRE RANDO, LE RÉSUMÉ ET LA COURBE (PJ) SERONT ENVOYÉS AUTOMATIQUEMENT & IMMÉDIATEMENT *** VÉRIFIEZ LE RESUMÉ AVANT D'ENVOYER *** MERCI</span>
+<span style="color:red; font-weight:bold;">N'ENVOYEZ PAS DE PDF SVP, UNIQUEMENT LE RÉSUMÉ ET LA COURBE (EN FICHIER JOINT), MERCI</span>
 <br><br>
 <button type="button" onclick="envoyerEmail()">2-Envoyer automatiquement</button>
 <br><br>
@@ -1019,6 +1019,48 @@ function getCanvasBase64() {
   }
   return canvas.toDataURL("image/png");
 }
+function getCanvasBase64WithFooter() {
+  const canvas = document.getElementById("elevationChart");
+  if (!canvas) return null;
+
+  const date = document.getElementById("date")?.value || "";
+  const dateFormatted = date
+    ? new Date(date).toLocaleDateString("fr-FR")
+    : "";
+
+  const rando = typeof getNomRando === "function"
+    ? getNomRando()
+    : "Randonnée";
+
+  const footerText = `${rando} — ${dateFormatted}`;
+  const footerHeight = 50;
+
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height + footerHeight;
+
+  const ctx = exportCanvas.getContext("2d");
+
+  // fond blanc
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+  // courbe
+  ctx.drawImage(canvas, 0, 0);
+
+  // texte
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+
+  ctx.fillText(
+    footerText,
+    exportCanvas.width / 2,
+    canvas.height + 32
+  );
+
+  return exportCanvas.toDataURL("image/png");
+}
 
 async function envoyerEmail() {
   const date = document.getElementById("date").value || "";
@@ -1038,7 +1080,7 @@ async function envoyerEmail() {
     resume +
     "\n\nCordialement.";
 
-  const image = getCanvasBase64();
+  const image = getCanvasBase64WithFooter();
 if (!image) {
   alert("La courbe n’est pas encore prête. Générez le profil avant l’envoi.");
   return;
