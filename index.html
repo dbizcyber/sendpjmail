@@ -1011,33 +1011,38 @@ function validerNumerique(id){
   if(valeur==="" || isNaN(valeur)){ messageErreur.textContent = "Valeurs numériques uniquement"; messageErreur.style.display = "block"; } else { messageErreur.style.display = "none"; }
 }
 
-
-function getCanvasBase64() {
-  const canvas = document.getElementById("elevationChart");
-  if (!canvas || canvas.width === 0 || canvas.height === 0) {
-    return null;
-  }
-  return canvas.toDataURL("image/png");
-}
 function getCanvasBase64WithFooter() {
   const canvas = document.getElementById("elevationChart");
   if (!canvas) return null;
 
+  // 🔒 Synchronisation réelle du canvas avec l'affichage
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+
+  const ctxOriginal = canvas.getContext("2d");
+  ctxOriginal.scale(dpr, dpr);
+
+  // 🔽 récupération des infos
   const date = document.getElementById("date")?.value || "";
   const dateFormatted = date
     ? new Date(date).toLocaleDateString("fr-FR")
     : "";
 
-  const rando = typeof getNomRando === "function"
-    ? getNomRando()
-    : "Randonnée";
+  const rando =
+    typeof getNomRando === "function" && getNomRando()
+      ? getNomRando()
+      : "Randonnée";
 
   const footerText = `${rando} — ${dateFormatted}`;
   const footerHeight = 50;
 
+  // 🎨 canvas d’export
   const exportCanvas = document.createElement("canvas");
   exportCanvas.width = canvas.width;
-  exportCanvas.height = canvas.height + footerHeight;
+  exportCanvas.height = canvas.height + footerHeight * dpr;
 
   const ctx = exportCanvas.getContext("2d");
 
@@ -1048,19 +1053,27 @@ function getCanvasBase64WithFooter() {
   // courbe
   ctx.drawImage(canvas, 0, 0);
 
+  // trait séparateur
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height + 1);
+  ctx.lineTo(exportCanvas.width, canvas.height + 1);
+  ctx.stroke();
+
   // texte
-  ctx.font = "16px Arial";
+  ctx.font = `${16 * dpr}px Arial`;
   ctx.fillStyle = "#000";
   ctx.textAlign = "center";
-
   ctx.fillText(
     footerText,
     exportCanvas.width / 2,
-    canvas.height + 32
+    canvas.height + 32 * dpr
   );
 
   return exportCanvas.toDataURL("image/png");
 }
+
 
 async function envoyerEmail() {
   const date = document.getElementById("date").value || "";
