@@ -748,12 +748,19 @@ label, input{
 <span style="color:red; font-weight:bold;">EN CLIQUANT SUR ENVOI, LE MAIL (AVEC LA COURBE EN PJ) PART IMMÉDIATEMENT, BIEN VÉRIFIER VOTRE RÉSUMÉ, VOTRE MESSAGERIE N'EST PAS UTILISÉE, MERCI</span>
 <!-- insertion pour saisie usermail -->
 <div class="bloc-champ">
-  <label for="emailUtilisateur">Recevoir une copie par email :</label>
+  <label for="emailUtilisateur">
+    Si vous souhaitez recevoir une copie par email, saisissez votre adresse
+    (aucune adresse n'est stockée) :
+  </label>
   <input
     type="email"
     id="emailUtilisateur"
     placeholder="exemple@email.com"
+    onblur="verifierEmail()"
   >
+  <div id="emailErreur" class="message-erreur">
+    Adresse email non valide
+  </div>
 </div>
 
 <br><br>
@@ -1120,7 +1127,10 @@ if (!image) {
     emailUtilisateur: document.getElementById("emailUtilisateur")?.value || ""
   })
 });
-
+if (!verifierEmail()) {
+  alert("Veuillez saisir une adresse email valide.");
+  return;
+}
 
   alert("Mail envoyé avec la courbe en pièce jointe ✅");
 }
