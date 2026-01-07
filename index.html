@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>index</title>
 
+
 <style>
+  /* === index copie du 6/1/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -527,7 +529,7 @@ label, input{
     border: 2px solid #005bbb;
     font-weight: bold;
   }
-
+  .bloc-duree label,
   .bloc-duree input, .bloc-duree input {
     border: 2px solid #555;
     font-weight: bold;
@@ -744,6 +746,16 @@ label, input{
 <button id="btn-generer" type="button">1-Générer le résumé</button>
 <br><br>
 <span style="color:red; font-weight:bold;">EN CLIQUANT SUR ENVOI, LE MAIL (AVEC LA COURBE EN PJ) PART IMMÉDIATEMENT, BIEN VÉRIFIER VOTRE RÉSUMÉ, VOTRE MESSAGERIE N'EST PAS UTILISÉE, MERCI</span>
+<!-- insertion pour saisie usermail -->
+<div class="bloc-champ">
+  <label for="emailUtilisateur">Recevoir une copie par email :</label>
+  <input
+    type="email"
+    id="emailUtilisateur"
+    placeholder="exemple@email.com"
+  >
+</div>
+
 <br><br>
 <button type="button" onclick="envoyerEmail()">2-Envoyer automatiquement</button>
 <br><br>
@@ -1072,6 +1084,9 @@ function getCanvasBase64WithFooter() {
 }
 
 async function envoyerEmail() {
+  const emailUtilisateur =
+  document.getElementById("emailUtilisateur")?.value || "";
+
   const date = document.getElementById("date").value || "";
   const dateFormatted = date
     ? new Date(date).toLocaleDateString("fr-FR")
@@ -1101,7 +1116,8 @@ if (!image) {
   body: JSON.stringify({
     subject: sujet,
     message: corpsMail,
-    imageBase64: image
+    imageBase64: image,
+    emailUtilisateur: document.getElementById("emailUtilisateur")?.value || ""
   })
 });
 
