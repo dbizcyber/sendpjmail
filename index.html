@@ -1110,6 +1110,7 @@ function verifierEmail() {
 }
 
 async function envoyerEmail() {
+  console.count("envoyerEmail appelé");
   const emailUtilisateur =
   document.getElementById("emailUtilisateur")?.value || "";
   // ✅ ICI : validation email (AVANT tout envoi)
