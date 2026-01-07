@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+// ✅ copie js du 6/1/2026
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -48,4 +49,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Mail sending failed" });
   }
 }
-
