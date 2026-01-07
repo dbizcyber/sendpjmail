@@ -1085,6 +1085,14 @@ function getCanvasBase64WithFooter() {
 
   return exportCanvas.toDataURL("image/png");
 }
+  // 🔒 Protection contre les envois multiples
+let envoiEnCours = false;
+
+/**
+ * Vérifie la validité de l'email utilisateur
+ * - champ optionnel
+ * - utilise la validation HTML5 (type="email")
+ */
 function verifierEmail() {
   const input = document.getElementById("emailUtilisateur");
   const erreur = document.getElementById("emailErreur");
@@ -1106,16 +1114,6 @@ function verifierEmail() {
 }
 
 async function envoyerEmail() {
-  if (envoiEnCours) return;
-  envoiEnCours = true;
-
-  const emailUtilisateur =
-    document.getElementById("emailUtilisateur")?.value || "";
-
-  if (!verifierEmail()) {
-    envoiEnCours = false;
-    return;
-  }
   const emailUtilisateur =
   document.getElementById("emailUtilisateur")?.value || "";
   // ✅ ICI : validation email (AVANT tout envoi)
