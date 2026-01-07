@@ -1106,7 +1106,16 @@ function verifierEmail() {
 }
 
 async function envoyerEmail() {
-  console.count("envoyerEmail appelé");
+  if (envoiEnCours) return;
+  envoiEnCours = true;
+
+  const emailUtilisateur =
+    document.getElementById("emailUtilisateur")?.value || "";
+
+  if (!verifierEmail()) {
+    envoiEnCours = false;
+    return;
+  }
   const emailUtilisateur =
   document.getElementById("emailUtilisateur")?.value || "";
   // ✅ ICI : validation email (AVANT tout envoi)
