@@ -1089,11 +1089,34 @@ function getCanvasBase64WithFooter() {
 
   return exportCanvas.toDataURL("image/png");
 }
+function verifierEmail() {
+  const input = document.getElementById("emailUtilisateur");
+  const erreur = document.getElementById("emailErreur");
+
+  // champ absent ou vide → OK (email optionnel)
+  if (!input || input.value.trim() === "") {
+    if (erreur) erreur.style.display = "none";
+    return true;
+  }
+
+  // validation HTML5 native
+  if (!input.checkValidity()) {
+    if (erreur) erreur.style.display = "block";
+    return false;
+  }
+
+  if (erreur) erreur.style.display = "none";
+  return true;
+}
 
 async function envoyerEmail() {
   const emailUtilisateur =
   document.getElementById("emailUtilisateur")?.value || "";
-
+  // ✅ ICI : validation email (AVANT tout envoi)
+  if (!verifierEmail()) {
+    alert("Veuillez saisir une adresse email valide.");
+    return;
+  }
   const date = document.getElementById("date").value || "";
   const dateFormatted = date
     ? new Date(date).toLocaleDateString("fr-FR")
@@ -1127,10 +1150,6 @@ if (!image) {
     emailUtilisateur: document.getElementById("emailUtilisateur")?.value || ""
   })
 });
-if (!verifierEmail()) {
-  alert("Veuillez saisir une adresse email valide.");
-  return;
-}
 
   alert("Mail envoyé avec la courbe en pièce jointe ✅");
 }
