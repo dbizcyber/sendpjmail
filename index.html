@@ -544,7 +544,6 @@ label, input{
 
   .bloc-champ label {
     display: block;
-    font-weight: bold;
     margin-bottom: 0.3rem;
   }
 
@@ -620,16 +619,18 @@ label, input{
 <!-- === IMPORT GPX & CALCUL IBP === -->
 <div class="bloc-champ" style="margin-bottom:2rem;">
   <label class="small-label" style="display:block; text-align:left;">
-  Importer un fichier GPX – L’analyse fournit : Distance, Dénivelé +,
-  Durée (si disponible) et IBP (HKG).
+   L’analyse fournit automatiquement : Distance, Dénivelé +,
+  Durée (si disponible) et IBP (HKG). 
+  La création du profil altimétrique est immédiate, il sera joint en PJ avec le mail.
 </label>
+  <button type="submit">Analyser le fichier GPX</button>
+  </form>
 
   <form enctype="multipart/form-data" id="formuploadajax">
     
     <input type="file" id="file" name="file" accept=".gpx" required>
     <br><br>
-    <button type="submit">Analyser le fichier GPX</button>
-  </form>
+    
 
   <p id="gpx-status" style="font-weight:bold;margin-top:8px;"></p>
 </div>
