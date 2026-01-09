@@ -168,6 +168,15 @@ hr {
 .dropdown-wrap {
   position: relative;
 }
+  .info-meteo {
+  margin: 6px 0;
+  font-size: 1em;
+}
+
+.info-meteo label {
+  
+  margin-right: 4px;
+}
 /* === Alignement à gauche des prévisions météo === */
 #meteo-openmeteo,
 #meteo-openmeteo * {
@@ -465,11 +474,13 @@ label, input{
 
 <!-- ✅ MÉTÉO OPEN-METEO -->
 <h2>🌦️ Météo au parking de départ - prévisions à 7 jours </h2>
-<h5> Prévisions météo fournies par : https://open-meteo.com/ </h5>
-<h5>Si le jour de rando est inclus dans l'intervalle, les prévisions seront surlignées en jaune, la prévision du jour de rando est directement intégrée dans la Feuille de Route</h5><h5>
-<div id="meteo-openmeteo" style="display:none;margin-top:15px;padding:12px;border-radius:10px;background:#eef7f7;">
-  <div id="meteo-current"></div>
-  <div id="meteo-forecast"></div>
+<div class="info-meteo">
+  <label>Note :</label>
+  <span>
+    Si le jour de rando est inclus dans l’intervalle, les prévisions seront
+    surlignées en jaune ; la prévision du jour de rando est directement intégrée
+    dans la Feuille de Route.
+  </span>
 </div>
 
 <hr>
@@ -961,7 +972,7 @@ if (window.meteoJourRando) {
     : "";
 
   resumeMeteo =
-    `🌤️ Météo prévue le ${formatDateFR(m.date)} (fournie à titre indicatif): ` +
+    `🌤️ Météo prévue le ${formatDateFR(m.date)} (fournie à titre indicatif open-meteo.com): ` +
     `${m.label}, ${m.tmin}°C / ${m.tmax}°C, ` +
     `☔ ${m.pluie}% ● ${ventTxt} ● ${rafalesTxt}`;
 
