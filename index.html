@@ -7,7 +7,7 @@
 
 
 <style>
-  /* === index copie du 6/1/26 === */
+  /* === index copie du 18/1/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -701,6 +701,22 @@ label, input{
 <div class="contenu-normal">
   <label for="remarques"><strong>Remarques &amp; particularités (texte jusqu'à 5000 caractères) :</strong></label>
   <textarea id="remarques" rows="4" maxlength="2000"></textarea>
+</div>
+<!-- ajout heure depart et vitesse-->
+<div class="contenu-normal" style="margin-top:1rem;">
+  <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:center;">
+
+    <div>
+      <label for="heure-depart-rando"><strong>Heure de départ :</strong></label><br>
+      <input type="time" id="heure-depart-rando" step="60">
+    </div>
+
+    <div>
+      <label for="vitesse"><strong>Vitesse moyenne (km/h) :</strong></label><br>
+      <input type="number" id="vitesse" min="1" max="10" step="0.1" placeholder="ex : 4.2">
+    </div>
+
+  </div>
 </div>
 <div id="profil-altimetrique" style="width:100%; max-width:100%;">
   <canvas id="elevationChart"></canvas>
@@ -1799,6 +1815,14 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 </script>
 <script>
+function minutesToHHMM(totalMinutes){
+  const h = Math.floor(totalMinutes / 60);
+  const m = Math.round(totalMinutes % 60);
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+</script>
+
+<script>
 function drawElevationChart(distances, elevations, segmentColors, segmentPentes) {
 
   const canvas = document.getElementById("elevationChart");
@@ -1818,8 +1842,8 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
         fill: false,
         tension: 0.25,
         segment: {
-          borderColor: ctx =>
-            segmentColors[ctx.p0DataIndex] || '#888'
+          borderColor: c =>
+            segmentColors[c.p0DataIndex] || '#888'
         }
       }]
     },
@@ -1829,26 +1853,57 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
       maintainAspectRatio: false,
 
       interaction: {
-        mode: 'index',
+        mode: 'nearest',
         intersect: false
       },
 
       plugins: {
         legend: { display: false },
+
         tooltip: {
           callbacks: {
-            label: ctx => {
-              const i = ctx.dataIndex;
+            label: context => {
+
+              const i = context.dataIndex;
+              const distanceKm = distances[i];
+              const altitude = Math.round(context.raw);
               const pente = segmentPentes[i] ?? 0;
-              return `Altitude : ${Math.round(ctx.raw)} m — Pente : ${pente.toFixed(1)} %`;
+
+              const vitesse =
+                parseFloat(document.getElementById("vitesse")?.value);
+
+              const heureDepart =
+                document.getElementById("heure-depart-rando")?.value;
+
+              let horaireTxt = "Horaire : —";
+
+              if (vitesse > 0 && heureDepart) {
+                const [h, m] = heureDepart.split(":").map(Number);
+                const departMinutes = h * 60 + m;
+                const dureeMinutes = (distanceKm / vitesse) * 60;
+                horaireTxt =
+                  "Horaire : " +
+                  minutesToHHMM(departMinutes + dureeMinutes);
+              }
+
+              return [
+                `Distance : ${distanceKm.toFixed(2)} km`,
+                `Altitude : ${altitude} m`,
+                `Pente : ${pente.toFixed(1)} %`,
+                horaireTxt
+              ];
             }
           }
         }
       },
 
       scales: {
-        x: { title: { display: true, text: "Distance (km)" } },
-        y: { title: { display: true, text: "Altitude (m)" } }
+        x: {
+          title: { display: true, text: "Distance (km)" }
+        },
+        y: {
+          title: { display: true, text: "Altitude (m)" }
+        }
       }
     },
 
@@ -1859,6 +1914,7 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
   });
 }
 </script>
+
 
 
 <script>
