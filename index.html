@@ -7,7 +7,7 @@
 
 
 <style>
-  /* === index copie du 18/1/26 === */
+  /* === index copie du 19/1/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -495,10 +495,9 @@ label, input{
   <label for="cout-autoroute">Coût de l'autoroute (€) :</label>
   <input type="number" id="cout-autoroute" oninput="calculerCouts()">
 </div>
-<p><strong>Total trajet : <span id="total-trajet">0</span> €</strong></p>
-<p>Coût total : <span id="cout-total">0</span> €</p>
-<p>Coût covoiturage (par 4) : <span id="covoit4">0</span> €</p>
-<p>Coût covoiturage (par 5) : <span id="covoit5">0</span> €</p>
+<p>Trajet : <strong><span id="total-trajet">0</span> €</strong>
+------  Total avec Autoroute : <strong><span id="cout-total">0</span> €</strong></p>
+<p>Coût covoiturage (par 4) : <span id="covoit4">0</span> € ------- (par 5) : <span id="covoit5">0</span> €</p>
 
 <hr>
 <h2>Informations techniques</h2>
@@ -560,6 +559,7 @@ label, input{
   .bloc-champ label {
     display: block;
     margin-bottom: 0.3rem;
+    font-weight: bold;
   }
 
   .bloc-champ input,
@@ -572,6 +572,7 @@ label, input{
     border-radius: 6px;
     border: 2px solid #555;
     font-size: 1rem;
+    font-weight: bold;
   }
 
   .message-erreur {
@@ -626,6 +627,10 @@ label, input{
   height:10px;
   border-radius:6px;
   background:linear-gradient(to right, orange, red);
+}
+.titre-section {
+  background-color: #e6f1f1;
+  color: #2f4f4f;
 }
 
 
@@ -703,10 +708,11 @@ label, input{
   <textarea id="remarques" rows="4" maxlength="2000"></textarea>
 </div>
 <!-- ajout heure depart et vitesse-->
-<div class="contenu-normal" style="margin-top:1rem;">
-  <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:center;">
 
-    <div>
+<h3 class="titre-section">Simulation</h3>
+    <div class="contenu-normal" style="margin-top:1rem;">
+  <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:center;">
+ <div>
       <label for="heure-depart-rando"><strong>Heure de départ :</strong></label><br>
       <input type="time" id="heure-depart-rando" step="60">
     </div>
@@ -715,7 +721,11 @@ label, input{
       <label for="vitesse"><strong>Vitesse moyenne (km/h) :</strong></label><br>
       <input type="number" id="vitesse" min="1" max="10" step="0.1" placeholder="ex : 4.2">
     </div>
-
+  <div>
+      <label for="duree-deplacement"><strong>Durée en déplacement :</strong></label><br>
+      <input type="text" id="duree-deplacement" readonly
+             style="background:#f0f0f0; font-weight:bold;">
+    </div>
   </div>
 </div>
 <div id="profil-altimetrique" style="width:100%; max-width:100%;">
@@ -868,6 +878,7 @@ recherche.addEventListener('keydown',(ev)=>{ if(resultsList.style.display==='non
 document.addEventListener('click',(ev)=>{ if(!ev.target.closest('.dropdown-wrap') && ev.target !== champAutre) hideList(); });
 
 /* --- divers utilitaires d'affichage --- */
+
 function afficherJour(){
   const date = document.getElementById("date").value;
   if(date){ const jour = new Date(date).toLocaleDateString('fr-FR',{weekday:'long'}); document.getElementById("jour-semaine").textContent = jour.charAt(0).toUpperCase()+jour.slice(1); }
@@ -1823,6 +1834,38 @@ function minutesToHHMM(totalMinutes){
 </script>
 
 <script>
+/* ===== OUTILS DUREE ===== */
+
+function formatDuree(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h > 0 ? `${h} h ${m} min` : `${m} min`;
+}
+
+function updateDureeDeplacement(distanceTotaleKm) {
+  const champ = document.getElementById("duree-deplacement");
+  const vitesse = parseFloat(document.getElementById("vitesse")?.value);
+
+  if (!champ || !vitesse || distanceTotaleKm <= 0) {
+    if (champ) champ.value = "—";
+    return;
+  }
+
+  const minutes = (distanceTotaleKm / vitesse) * 60;
+  champ.value = formatDuree(minutes);
+}
+
+/* ===== LISTENER (AU BON MOMENT) ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("vitesse")?.addEventListener("input", () => {
+    if (window.lastDistanceTotale) {
+      updateDureeDeplacement(window.lastDistanceTotale);
+    }
+  });
+});
+</script>
+
+<script>
 function drawElevationChart(distances, elevations, segmentColors, segmentPentes) {
 
   const canvas = document.getElementById("elevationChart");
@@ -1912,10 +1955,14 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
       verticalCursorPlugin
     ]
   });
+    /* ===== FIN drawElevationChart ===== */
+  const distanceTotaleKm = distances[distances.length - 1];
+
+  window.lastDistanceTotale = distanceTotaleKm;   // ← ICI
+  updateDureeDeplacement(distanceTotaleKm);
 }
+
 </script>
-
-
 
 <script>
 const titreExportPlugin = {
