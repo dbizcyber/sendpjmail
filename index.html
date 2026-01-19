@@ -1864,12 +1864,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
+<script>
+function getStepDistance(totalKm) {
+  if (totalKm <= 5) return 0.5;
+  if (totalKm <= 15) return 1;
+  return 2;
+}
+</script>
 <script>
 function drawElevationChart(distances, elevations, segmentColors, segmentPentes) {
 
   const canvas = document.getElementById("elevationChart");
   const ctx = canvas.getContext("2d");
+
+  const totalKm = distances[distances.length - 1];
+  const stepX = getStepDistance(totalKm);
 
   if (elevationChartInstance) elevationChartInstance.destroy();
 
@@ -1877,19 +1886,21 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
     type: "line",
 
     data: {
-      labels: distances.map(d => d.toFixed(2)),
-      datasets: [{
-        data: elevations,
-        borderWidth: 3,
-        pointRadius: 0,
-        fill: false,
-        tension: 0.25,
-        segment: {
-          borderColor: c =>
-            segmentColors[c.p0DataIndex] || '#888'
-        }
-      }]
-    },
+  datasets: [{
+    data: distances.map((d, i) => ({
+      x: d,
+      y: elevations[i]
+    })),
+    borderWidth: 3,
+    pointRadius: 0,
+    fill: false,
+    tension: 0.25,
+    segment: {
+      borderColor: c =>
+        segmentColors[c.p0DataIndex] || '#888'
+    }
+  }]
+},
 
     options: {
       responsive: true,
@@ -1904,87 +1915,89 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
         legend: { display: false },
 
         tooltip: {
-          callbacks: {
-            label: context => {
+  callbacks: {
+    label: context => {
 
-              const i = context.dataIndex;
-              const distanceKm = distances[i];
-              const altitude = Math.round(context.raw);
-              const pente = segmentPentes[i] ?? 0;
+      const i = context.dataIndex;
+      const distanceKm = context.parsed.x;
+      const altitude = Math.round(context.parsed.y);
+      const pente = segmentPentes[i] ?? 0;
 
-              const vitesse =
-                parseFloat(document.getElementById("vitesse")?.value);
+      const vitesse =
+        parseFloat(document.getElementById("vitesse")?.value);
 
-              const heureDepart =
-                document.getElementById("heure-depart-rando")?.value;
+      const heureDepart =
+        document.getElementById("heure-depart-rando")?.value;
 
-              let horaireTxt = "Horaire : —";
+      let horaireTxt = "Horaire : —";
 
-              if (vitesse > 0 && heureDepart) {
-                const [h, m] = heureDepart.split(":").map(Number);
-                const departMinutes = h * 60 + m;
-                const dureeMinutes = (distanceKm / vitesse) * 60;
-                horaireTxt =
-                  "Horaire : " +
-                  minutesToHHMM(departMinutes + dureeMinutes);
-              }
+      if (vitesse > 0 && heureDepart) {
+        const [h, m] = heureDepart.split(":").map(Number);
+        const departMinutes = h * 60 + m;
+        const dureeMinutes = (distanceKm / vitesse) * 60;
+        horaireTxt =
+          "Horaire : " +
+          minutesToHHMM(departMinutes + dureeMinutes);
+      }
 
-              return [
-                `Distance : ${distanceKm.toFixed(2)} km`,
-                `Altitude : ${altitude} m`,
-                `Pente : ${pente.toFixed(1)} %`,
-                horaireTxt
-              ];
-            }
-          }
-        }
-      },
+      return [
+        `Distance : ${distanceKm.toFixed(2)} km`,
+        `Altitude : ${altitude} m`,
+        `Pente : ${pente.toFixed(1)} %`,
+        horaireTxt
+      ];
+    }
+  }
+}
+},
 
       scales: {
-        x: {
-          title: { display: true, text: "Distance (km)" }
-        },
-        y: {
-          title: { display: true, text: "Altitude (m)" }
-        }
+  x: {
+    type: 'linear',
+    min: 0,
+    max: totalKm,
+
+    title: {
+      display: true,
+      text: "Distance (km)"
+    },
+
+    ticks: {
+      stepSize: stepX,
+      callback: v => {
+        const n = Number(v);
+        return Number.isInteger(n) ? n.toString().replace('.', ',') : '';
       }
     },
+
+    grid: {
+      color: ctx =>
+        ctx.tick.value % 1 === 0 ? '#999' : '#ddd'
+    }
+  },
+
+  y: {
+    title: {
+      display: true,
+      text: "Altitude (m)"
+        }
+      }
+    }
+  },
 
     plugins: [
       whiteBackgroundPlugin,
       verticalCursorPlugin
     ]
   });
-    /* ===== FIN drawElevationChart ===== */
-  const distanceTotaleKm = distances[distances.length - 1];
 
-  window.lastDistanceTotale = distanceTotaleKm;   // ← ICI
-  updateDureeDeplacement(distanceTotaleKm);
+  /* ===== FIN drawElevationChart ===== */
+  window.lastDistanceTotale = totalKm;
+  updateDureeDeplacement(totalKm);
 }
-
 </script>
 
-<script>
-const titreExportPlugin = {
-  id: 'titreExportPlugin',
-  afterDraw(chart, args, options) {
-    const { ctx, chartArea, width, height } = chart;
 
-    if (!options || !options.text) return;
-
-    ctx.save();
-    ctx.font = "bold 14px Arial";
-    ctx.fillStyle = "#000";
-    ctx.textAlign = "center";
-
-    // position sous la zone du graphique
-    const y = chartArea.bottom + 20;
-
-    ctx.fillText(options.text, width / 2, y);
-    ctx.restore();
-  }
-};
-</script>
 
 <!-- === FIN IBPindex GPX API & noms auto du jpg exporté === -->
 
