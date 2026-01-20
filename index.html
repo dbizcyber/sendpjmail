@@ -7,7 +7,7 @@
 
 
 <style>
-  /* === index copie du 19/1/26 === */
+  /* === index copie du 20/1/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -994,9 +994,13 @@ let alerteVent = "";
 if (window.meteoJourRando) {
   const m = window.meteoJourRando;
 
-  const ventTxt = (m.vent !== null && m.vent !== undefined)
-    ? `💨 Vent ${m.vent} km/h`
+  const ventTxt =
+  (m.vent !== null && m.vent !== undefined)
+    ? `💨 Vent ${m.vent} km/h${m.ventDir !== null && m.ventDir !== undefined
+        ? " (" + directionVent(m.ventDir) + ")"
+        : ""}`
     : "💨 Vent N/D";
+
 
   const rafalesTxt = (m.rafales !== null && m.rafales !== undefined)
     ? `🌪 Rafales ${m.rafales} km/h`
@@ -1004,8 +1008,8 @@ if (window.meteoJourRando) {
 
   resumeMeteo =
     `🌤️ Météo prévue le ${formatDateFR(m.date)} (fournie à titre indicatif par open-meteo.com): ` +
-    `${m.label}, ${m.tmin}°C / ${m.tmax}°C, ` +
-    `☔ ${m.pluie}% ● ${ventTxt} ● ${rafalesTxt}`;
+    `${m.label}, ☔ ${m.pluie}%` +
+    ` ● ${m.tmin}°C / ${m.tmax}°C ● ${ventTxt} ● ${rafalesTxt}`;
 
   if (m.rafales >= 60) {
     alerteVent = " ⚠️ ATTENTION : rafales fortes, vigilance randonnée !";
@@ -1427,6 +1431,12 @@ function weatherLabel(code){
   if(code >= 95) return "⛈️ Orage";
   return "🌥️ Variable";
 }
+      function directionVent(deg) {
+  if (deg === null || deg === undefined) return "N/D";
+  const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE",
+                "S","SSO","SO","OSO","O","ONO","NO","NNO"];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
 function formatDateFR(dateStr){
   const d = new Date(dateStr);
   return d.toLocaleDateString("fr-FR");
@@ -1436,18 +1446,21 @@ function updateOpenMeteo(lat, lon){
   window.meteoJourRando = null;
 
   const url =
-    "https://api.open-meteo.com/v1/forecast" +
-    `?latitude=${lat}&longitude=${lon}` +
-    "&daily=temperature_2m_max,temperature_2m_min," +
-    "precipitation_sum,precipitation_probability_max,weathercode," +
-    "windspeed_10m_max,windgusts_10m_max" +
-    "&forecast_days=7" +
-    "&timezone=Europe/Paris";
+  "https://api.open-meteo.com/v1/forecast" +
+  `?latitude=${lat}&longitude=${lon}` +
+  "&daily=temperature_2m_max,temperature_2m_min," +
+  "precipitation_probability_max,weathercode," +
+  "windspeed_10m_max,winddirection_10m_dominant,windgusts_10m_max" +
+  "&forecast_days=7" +
+  "&timezone=Europe/Paris";
 
   fetch(url)
     .then(r => r.json())
     .then(data => {
-
+  if (!data || !data.daily || !Array.isArray(data.daily.time)) {
+  console.error("Réponse Open-Meteo invalide :", data);
+  return;
+}
       const bloc = document.getElementById("meteo-openmeteo");
       if(!bloc) return;
 
@@ -1457,6 +1470,7 @@ function updateOpenMeteo(lat, lon){
       const dateRando = getDateRando();
 
       window.meteoJourRando = null;
+
 
       data.daily.time.forEach((day, i) => {
 
@@ -1471,6 +1485,7 @@ function updateOpenMeteo(lat, lon){
         const vent = data.daily.windspeed_10m_max?.[i];
         const rafales = data.daily.windgusts_10m_max?.[i];
         const label = weatherLabel(data.daily.weathercode?.[i]);
+        const ventDir = data.daily.winddirection_10m_dominant?.[i] ?? null;
 
         // sauvegarde jour de rando
         if(isRandoDay){
@@ -1481,16 +1496,17 @@ function updateOpenMeteo(lat, lon){
             tmax,
             pluie,
             vent,
-            rafales
+            rafales,
+            ventDir   // 👈 AJOUTER
           };
         }
 
         html += `
           <li class="${cls}">
             <b>${formatDateFR(day)}</b> ● ${label}
-            ● ${tmin ?? "—"}°C / ${tmax ?? "—"}°C
             ● ☔ ${pluie ?? "—"} %
-            ● 💨 ${vent ?? "—"} km/h
+            ● ${tmin ?? "—"}°C / ${tmax ?? "—"}°C
+            ● 💨 ${vent ?? "—"} km/h${ventDir !== null ? ` (${directionVent(ventDir)})` : ""}
             ● 🌪 ${rafales ?? "—"} km/h
           </li>`;
       });
