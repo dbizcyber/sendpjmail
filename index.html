@@ -7,7 +7,7 @@
 
 
 <style>
-  /* === index copie du 20/1/26 === */
+  /* === index_manquants_validation_envoimail_04/02/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -632,6 +632,11 @@ label, input{
   background-color: #e6f1f1;
   color: #2f4f4f;
 }
+button:disabled {
+  background-color: #bbb;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 
 
 </style>
@@ -795,7 +800,7 @@ label, input{
   <input
     type="email"
     id="emailUtilisateur"
-    placeholder="exemple@email.com"
+    placeholder="Gérardmenvuçà@email.com"
     onblur="verifierEmail()"
   >
   <div id="emailErreur" class="message-erreur">
@@ -804,14 +809,28 @@ label, input{
 </div>
 
 <br><br>
-<button type="button" onclick="envoyerEmail()">2-Envoyer automatiquement</button>
+<button
+  id="btn-envoyer-mail"
+  type="button"
+  onclick="envoyerEmail()"
+>
+  2-Envoyer automatiquement
+</button>
+
+
 <br><br>
 <div id="resultat" aria-live="polite"></div>
+
 <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 
 <!-- Script unique et ordonné -->
 <script>
+  let popupDejaAffiche = false;
+  let gpxImporte = false;
+  let resumeGenere = false;
+  window.gpxImporte = false;
+  window.resumeGenere = false;
   window.meteoJourRando = null;
 
   function getDateRando(){
@@ -951,6 +970,19 @@ function getLibelleTechnicite(valeur){ const niveaux=["Facile","Assez Facile","P
 function getLibelleRisque(valeur){ const niveaux=["Faible","Assez Faible","Peu Élevé","Assez Élevé","😅 Élevé"]; return niveaux[valorToIndex(valeur)] || "Non renseigné"; }
 function valorToIndex(v){ return (typeof v==='number' && v>=1 && v<=5) ? v-1 : -1; }
 
+/* --- champs manquants --- */
+function estVide(valeur) {
+  return (
+    valeur === null ||
+    valeur === undefined ||
+    valeur === "" ||
+    valeur === 0 ||
+    valeur === "0" ||
+    valeur.toString().includes("Non renseigné")
+  );
+}
+
+
 /* --- fonction principale : génère le texte -> sécurisée --- */
 function genererTexte(){
   const nomRando = getNomRando() || '<span style="color:red">Non renseigné</span>';
@@ -988,6 +1020,7 @@ function genererTexte(){
   const remarques = getValeurOuRouge("remarques");
   const organisateur = document.getElementById("organisateur-label")?.textContent || '<span style="color:red">Non renseigné</span>';
   const blocK = getValeurOuRouge("bloc");
+
   let resumeMeteo = "🌤️ Météo prévue : <span style='color:red'>Non disponible</span>";
 let alerteVent = "";
 
@@ -1015,7 +1048,93 @@ if (window.meteoJourRando) {
     alerteVent = " ⚠️ ATTENTION : rafales fortes, vigilance randonnée !";
   }
 }
+// =======================
+// CHAMPS MANQUANTS (SANS DOUBLON)
+// =======================
+const champsSet = new Set();
 
+// Identité rando
+if (estVide(nomRando))
+  champsSet.add(JSON.stringify({ label: "Nom de la randonnée", id: "nom" }));
+
+if (!dateVal)
+  champsSet.add(JSON.stringify({ label: "Date de la randonnée", id: "date" }));
+
+if (estVide(jour))
+  champsSet.add(JSON.stringify({ label: "Jour de la randonnée", id: "jour-semaine" }));
+
+// Rendez-vous
+if (estVide(lieuRV))
+  champsSet.add(JSON.stringify({ label: "Parking de covoiturage", id: "lieu" }));
+
+if (estVide(heureRV))
+  champsSet.add(JSON.stringify({ label: "Heure de rendez-vous", id: "heure-rv" }));
+
+// Trajet
+if (estVide(description))
+  champsSet.add(JSON.stringify({ label: "Description du trajet", id: "description" }));
+
+if (estVide(trajetkm))
+  champsSet.add(JSON.stringify({ label: "Kilométrage voiture", id: "trajet-km" }));
+
+if (estVide(parkingDepart))
+  champsSet.add(JSON.stringify({ label: "Parking départ randonnée", id: "parking-depart" }));
+
+// Coûts
+if (estVide(totalTrajet))
+  champsSet.add(JSON.stringify({ label: "Coût du trajet", id: "total-trajet" }));
+
+if (estVide(coutTotal))
+  champsSet.add(JSON.stringify({ label: "Coût total", id: "cout-total" }));
+
+// Randonnée
+if (estVide(km))
+  champsSet.add(JSON.stringify({ label: "Distance de la randonnée", id: "km" }));
+
+if (estVide(denivele))
+  champsSet.add(JSON.stringify({ label: "Dénivelé", id: "denivele" }));
+
+if (estVide(duree))
+  champsSet.add(JSON.stringify({ label: "Durée", id: "duree" }));
+
+// Difficulté
+if (estVide(ibp))
+  champsSet.add(JSON.stringify({ label: "IBP (Effort)", id: "ibp" }));
+
+if (techniciteValeur === 0)
+  champsSet.add(JSON.stringify({ label: "Technicité", id: "technicite" }));
+
+if (risqueValeur === 0)
+  champsSet.add(JSON.stringify({ label: "Risque", id: "risque" }));
+
+// Organisation
+if (estVide(organisateur))
+  champsSet.add(JSON.stringify({ label: "Animateur-trice", id: "organisateur" }));
+
+// GPX (UNE SEULE FOIS)
+const inputGPX = document.getElementById("file");
+if (!inputGPX || !inputGPX.files || inputGPX.files.length === 0) {
+  champsSet.add(
+    JSON.stringify({
+      label: "Fichier GPX non importé → pas de profil",
+      id: "file"
+    })
+  );
+}
+const champsManquants = Array.from(champsSet).map(c => JSON.parse(c));
+if (champsManquants.length > 0 && !popupDejaAffiche) {
+  afficherPopupChampsManquants(champsManquants);
+  popupDejaAffiche = true;
+}
+
+const btnMail = document.getElementById("btn-envoyer-mail");
+if (btnMail) {
+  btnMail.disabled = false;
+  btnMail.title = "Résumé généré – vous pouvez envoyer le mail";
+}
+ /* =======================
+     3. CONSTRUCTION RÉSUMÉ
+     ======================= */
 
   const resume = `
 Feuille de route : ${jour} ${dateFormatted} — ${nomRando}
@@ -1058,17 +1177,41 @@ L'animateur-trice se réserve le droit de modifier le circuit.
 ÉQUIPEMENT : Les chaussures de randonnée montantes et les bâtons de marche sont obligatoires. 
 Prévoir des vêtements de protection (vent, pluie, froid), un sac à dos avec pique-nique et de l'eau en quantité suffisante, ainsi que sa propre pharmacie.
 `.trim();
-
-
-  const resultatDiv = document.getElementById("resultat");
-  if(!resultatDiv){ alert("Erreur : conteneur du résumé introuvable."); return; }
-  // resultatDiv.innerHTML = resume;
-  resultatDiv.innerHTML = resume.replace(/\n/g, "<br>");
-
-  // accessible : focus sur résultat
-  resultatDiv.focus?.();
+// === POPUP INFORMATIF (non bloquant) ===
+if (champsManquants.length > 0) {
+  afficherPopupChampsManquants(champsManquants);
 }
 
+
+  /* =======================
+     4. AFFICHAGE
+     ======================= */
+    const resultatDiv = document.getElementById("resultat");
+  if (!resultatDiv) {
+    alert("Erreur : conteneur du résumé introuvable");
+    return;
+  }
+
+  resultatDiv.innerHTML = resume.replace(/\n/g, "<br>");
+
+window.resumeGenere = true; // ✅ ICI ET NULLE PART AILLEURS
+
+const btn = document.getElementById("btn-envoyer-mail");
+if (btn) {
+  btn.disabled = false;
+  btn.style.opacity = "1";
+  btn.style.cursor = "pointer";
+}
+
+resultatDiv.focus?.();
+}
+
+
+const btn = document.getElementById("btn-envoyer-mail");
+if (btn) {
+  btn.classList.remove("btn-bloque");
+  btn.title = "Résumé prêt ✔️";
+}
 /* --- copies / envoi --- */
 function validerNumerique(id){
   const champ=document.getElementById(id);
@@ -1159,13 +1302,24 @@ function verifierEmail() {
 }
 
 async function envoyerEmail() {
+
+  // 🔒 Protection : résumé non généré
+if (!window.resumeGenere) {
+  const btn = document.getElementById("btn-envoyer-mail");
+  afficherInfoBouton(btn, "Générez d’abord le résumé ✍️");
+  return;
+}
+
+
   const emailUtilisateur =
-  document.getElementById("emailUtilisateur")?.value || "";
-  // ✅ ICI : validation email (AVANT tout envoi)
+    document.getElementById("emailUtilisateur")?.value || "";
+
+  // ✅ validation email
   if (!verifierEmail()) {
     alert("Veuillez saisir une adresse email valide.");
     return;
   }
+
   const date = document.getElementById("date").value || "";
   const dateFormatted = date
     ? new Date(date).toLocaleDateString("fr-FR")
@@ -1174,6 +1328,11 @@ async function envoyerEmail() {
   const jour = document.getElementById("jour-semaine").textContent || "";
   const lieu = getNomRando() || "Non renseigné";
   const resume = document.getElementById("resultat").innerText || "";
+
+  if (!resume.trim()) {
+    alert("Le résumé est vide. Veuillez le générer.");
+    return;
+  }
 
   const sujet = `${jour} ${dateFormatted} ${lieu}`;
 
@@ -1184,23 +1343,121 @@ async function envoyerEmail() {
     "\n\nCordialement.";
 
   const image = getCanvasBase64WithFooter();
-if (!image) {
-  alert("La courbe n’est pas encore prête. Générez le profil avant l’envoi.");
-  return;
-}
+  if (!image) {
+    alert("La courbe n’est pas encore prête. Générez le profil avant l’envoi.");
+    return;
+  }
 
   await fetch("/api/send-mail", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    subject: sujet,
-    message: corpsMail,
-    imageBase64: image,
-    emailUtilisateur: document.getElementById("emailUtilisateur")?.value || ""
-  })
-});
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      subject: sujet,
+      message: corpsMail,
+      imageBase64: image,
+      emailUtilisateur: emailUtilisateur
+    })
+  });
 
   alert("Mail envoyé avec la courbe en pièce jointe ✅");
+}
+
+
+/* =========================
+   POPUP CHAMPS MANQUANTS
+   ========================= */
+
+function afficherPopupChampsManquants(champs) {
+  const popup = document.getElementById("popup-missing");
+  const list = document.getElementById("missing-list");
+
+  if (!popup || !list) return;
+
+  list.innerHTML = "";
+
+  champs.forEach(champ => {
+    const li = document.createElement("li");
+
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = champ.label;
+    a.style.color = "#000";
+    a.style.textDecoration = "underline";
+    a.style.cursor = "pointer";
+
+    a.onclick = (e) => {
+      e.preventDefault();
+      popup.style.display = "none";
+
+      const el = document.getElementById(champ.id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus?.();
+      }
+    };
+
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  popup.style.display = "flex";
+}
+
+function fermerPopupMissing() {
+  const popup = document.getElementById("popup-missing");
+  if (popup) popup.style.display = "none";
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btn-envoyer-mail");
+if (btn) {
+  // ❌ PAS DE disabled
+  btn.style.opacity = "0.5";
+  btn.style.cursor = "not-allowed";
+  btn.title = "Veuillez d'abord générer le résumé";
+}
+});
+function afficherInfoBouton(bouton, message) {
+  if (!bouton) return;
+
+  // Supprimer une bulle existante
+  const ancienne = document.getElementById("info-bulle-bouton");
+  if (ancienne) ancienne.remove();
+
+  const bulle = document.createElement("div");
+  bulle.id = "info-bulle-bouton";
+  bulle.textContent = message;
+
+  Object.assign(bulle.style, {
+    position: "absolute",
+    background: "#de1062",
+    color: "#fff",
+    padding: "8px 14px",
+    borderRadius: "12px",
+    fontSize: "0.95rem",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+    zIndex: 10000,
+    whiteSpace: "nowrap",
+    opacity: "0",
+    transition: "opacity 0.25s ease"
+  });
+
+  document.body.appendChild(bulle);
+
+  const rect = bouton.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+  bulle.style.left = rect.left + rect.width / 2 - bulle.offsetWidth / 2 + "px";
+  bulle.style.top = rect.top + scrollY - 45 + "px";
+
+  requestAnimationFrame(() => {
+    bulle.style.opacity = "1";
+  });
+
+  // disparition auto
+  setTimeout(() => {
+    bulle.style.opacity = "0";
+    setTimeout(() => bulle.remove(), 300);
+  }, 3000);
 }
 
 
@@ -1666,14 +1923,15 @@ $(function(){
       processData: false
     })
     .done(function(data){
-
   console.log("Réponse IBP brute :", data);
 
   exploiterIBP(data);
 
-  $("#gpx-status").text("✅ GPX analysé avec succès");
+  window.gpxImporte = true; // ✅ GPX bien analysé
 
+  $("#gpx-status").text("✅ GPX analysé avec succès");
 })
+
 
     .fail(err=>{
       console.error("Erreur IBPindex:", err);
@@ -1840,7 +2098,48 @@ function haversine(lat1, lon1, lat2, lon2) {
 
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
+  function afficherPopupChampsManquants(champs) {
+  const popup = document.getElementById("popup-missing");
+  const list = document.getElementById("missing-list");
+
+  if (!popup || !list) return;
+
+  list.innerHTML = "";
+
+  champs.forEach(({ label, id }) => {
+    const li = document.createElement("li");
+
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = label;
+    a.style.cursor = "pointer";
+    a.style.color = "#000";
+    a.style.textDecoration = "underline";
+
+    a.onclick = (e) => {
+      e.preventDefault();
+      fermerPopupMissing();
+
+      const champ = document.getElementById(id);
+      if (!champ) return;
+
+      champ.scrollIntoView({ behavior: "smooth", block: "center" });
+      champ.focus?.();
+
+      // surlignage temporaire
+      champ.style.outline = "3px solid #000";
+      setTimeout(() => champ.style.outline = "", 2000);
+    };
+
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  popup.style.display = "flex";
+}
+
 </script>
+
 <script>
 function minutesToHHMM(totalMinutes){
   const h = Math.floor(totalMinutes / 60);
@@ -1880,6 +2179,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
 <script>
 function getStepDistance(totalKm) {
   if (totalKm <= 5) return 0.5;
@@ -1887,6 +2187,7 @@ function getStepDistance(totalKm) {
   return 2;
 }
 </script>
+
 <script>
 function drawElevationChart(distances, elevations, segmentColors, segmentPentes) {
 
@@ -2012,9 +2313,6 @@ function drawElevationChart(distances, elevations, segmentColors, segmentPentes)
   updateDureeDeplacement(totalKm);
 }
 </script>
-
-
-
 <!-- === FIN IBPindex GPX API & noms auto du jpg exporté === -->
 
 <script>
@@ -2087,8 +2385,6 @@ document.getElementById("exportProfilJPG").addEventListener("click", function ()
 });
 </script>
 
-
-
 <script>
 window.addEventListener("resize", () => {
   if (elevationChartInstance) {
@@ -2097,6 +2393,39 @@ window.addEventListener("resize", () => {
 });
 </script>
 
+<!-- POPUP CHAMPS MANQUANTS -->
+<div id="popup-missing" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(100,100,100,0.4);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    background:#de1062;
+    color:#000;
+    padding:20px 25px;
+    border-radius:18px;
+    max-width:420px;
+    width:90%;
+  ">
+    <h4 style="margin-top:0;text-align:center;">
+      ⚠️ POUR INFO: Les champs suivants ne sont pas renseignés ! 
+    </h4>
+
+    <ul id="missing-list" style="text-align:left; padding-left:20px;"></ul>
+
+
+    <div style="text-align:center;margin-top:10px;">
+      <h4 style="margin-top:0;text-align:border-left;">
+      Poursuivez votre FdR en cliquant ⬇️
+    </h4>
+      <button onclick="fermerPopupMissing()">J'ai compris</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
