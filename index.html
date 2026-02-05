@@ -7,7 +7,7 @@
 
 
 <style>
-  /* === index_manquants_03/02/26 === */
+  /* === index_manquants_05/02/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -970,6 +970,9 @@ function estVide(valeur) {
 
 /* --- fonction principale : génère le texte -> sécurisée --- */
 function genererTexte(){
+  if (!verifierChampsAvantEnvoi()) {
+    return;
+  }
   const nomRando = getNomRando() || '<span style="color:red">Non renseigné</span>';
   const dateVal = document.getElementById("date").value;
   const dateFormatted = dateVal ? new Date(dateVal).toLocaleDateString("fr-FR") : '<span style="color:red">Non renseigné</span>';
@@ -1034,71 +1037,6 @@ if (window.meteoJourRando) {
   }
 }
 
-  // ✅ résumé TOUJOURS généré
-//   genererTexte();
-// }
-
-
-
-
-// =======================
-// CHAMPS MANQUANTS (SANS DOUBLON)
-// =======================
-const champsSet = new Set();
-
-// Identité rando
-if (estVide(nomRando)) champsSet.add("Nom de la randonnée");
-if (!dateVal) champsSet.add("Date de la randonnée");
-if (estVide(jour)) champsSet.add("Jour de la randonnée");
-
-// Rendez-vous
-if (estVide(lieuRV)) champsSet.add("Parking de covoiturage");
-if (estVide(heureRV)) champsSet.add("Heure de rendez-vous");
-if (estVide(heureDepart)) champsSet.add("Heure de départ");
-
-// Trajet
-if (estVide(description)) champsSet.add("Description du trajet");
-if (estVide(trajetkm)) champsSet.add("Kilométrage voiture");
-if (estVide(parkingDepart)) champsSet.add("Parking départ randonnée");
-
-// Coûts
-if (estVide(totalTrajet)) champsSet.add("Coût du trajet");
-if (estVide(coutTotal)) champsSet.add("Coût total");
-if (estVide(covoit4)) champsSet.add("Covoiturage (4 pers)");
-if (estVide(covoit5)) champsSet.add("Covoiturage (5 pers)");
-
-// Randonnée
-if (estVide(km)) champsSet.add("Distance de la randonnée");
-if (estVide(denivele)) champsSet.add("Dénivelé");
-if (estVide(duree)) champsSet.add("Durée");
-
-// Difficulté
-if (estVide(ibp)) champsSet.add("IBP");
-if (estVide(effort)) champsSet.add("Effort");
-if (techniciteValeur === 0) champsSet.add("Technicité");
-if (risqueValeur === 0) champsSet.add("Risque");
-
-// Organisation
-if (estVide(organisateur)) champsSet.add("Animateur-trice");
-
-// Infos utiles
-if (estVide(remarques)) champsSet.add("Remarques / particularités");
-
-// GPX (UNE SEULE FOIS)
-const inputGPX = document.getElementById("file");
-if (!inputGPX || !inputGPX.files || inputGPX.files.length === 0) {
-  champsSet.add("Fichier GPX non importé");
-}
-
-// =======================
-// AFFICHAGE POPUP (INFORMATIF)
-// =======================
-const champsManquants = Array.from(champsSet);
-if (champsManquants.length > 0) {
-  afficherPopupChampsManquants(champsManquants);
-}
-
-
   /* =======================
      3. CONSTRUCTION RÉSUMÉ
      ======================= */
@@ -1144,11 +1082,6 @@ L'animateur-trice se réserve le droit de modifier le circuit.
 ÉQUIPEMENT : Les chaussures de randonnée montantes et les bâtons de marche sont obligatoires. 
 Prévoir des vêtements de protection (vent, pluie, froid), un sac à dos avec pique-nique et de l'eau en quantité suffisante, ainsi que sa propre pharmacie.
 `.trim();
-// === POPUP INFORMATIF (non bloquant) ===
-if (champsManquants.length > 0) {
-  afficherPopupChampsManquants(champsManquants);
-}
-
 
   /* =======================
      4. AFFICHAGE
@@ -1251,6 +1184,76 @@ function verifierEmail() {
   if (erreur) erreur.style.display = "none";
   return true;
 }
+function verifierChampsAvantEnvoi() {
+  const champsSet = new Set();
+
+  // --- Infos générales ---
+  if (estVide(getNomRando())) champsSet.add("Nom de la randonnée");
+  if (!document.getElementById("date")?.value)
+    champsSet.add("Date de la randonnée");
+
+  const jour = document.getElementById("jour-semaine")?.textContent?.trim();
+  if (!jour) champsSet.add("Jour de la randonnée");
+
+  // --- Horaires ---
+  const heureRV = document.getElementById("heure-rv")?.value || "";
+  if (estVide(heureRV)) champsSet.add("Heure de rendez-vous");
+
+  const heureDepart = document.getElementById("heure-depart")?.textContent?.trim() || "";
+  if (!heureDepart) champsSet.add("Heure de départ");
+
+  const parkingDepart = document.getElementById("parking-depart")?.value || "";
+  if (estVide(parkingDepart))
+    champsSet.add("Parking de départ de la randonnée");
+
+    // --- GPX ---
+  const inputGPX = document.getElementById("file");
+  if (!inputGPX || inputGPX.files.length === 0) {
+    champsSet.add("Fichier GPX non importé");
+
+  // --- Trajet & rando ---
+  const km = document.getElementById("km")?.value || "";
+  if (estVide(km)) champsSet.add("Distance de la randonnée");
+
+  const denivele = document.getElementById("denivele")?.value || "";
+  if (estVide(denivele)) champsSet.add("Dénivelé");
+
+  const duree = document.getElementById("duree")?.value || "";
+  if (estVide(duree)) champsSet.add("Durée totale (hh:mm)");
+
+    // --- Cotation ---
+  const ibp = document.getElementById("ibp")?.value || "";
+  if (estVide(ibp)) champsSet.add("IBP (Effort)");
+
+  const technicite = document.getElementById("technicite")?.value || "";
+  if (estVide(technicite) || technicite === "0")
+    champsSet.add("Technicité");
+
+  const risque = document.getElementById("risque")?.value || "";
+  if (estVide(risque) || risque === "0")
+    champsSet.add("Risque");
+
+
+  }
+
+  // --- Organisateur ---
+  const organisateur = document.getElementById("organisateur")?.value || "";
+  if (estVide(organisateur))
+    champsSet.add("Nom de l’organisateur");
+
+
+
+  // --- Résultat ---
+  const champsManquants = [...champsSet];
+
+  if (champsManquants.length > 0) {
+    afficherPopupChampsManquants(champsManquants);
+    return false;
+  }
+
+  return true;
+}
+
 
 async function envoyerEmail() {
   const emailUtilisateur =
@@ -1301,6 +1304,7 @@ if (!image) {
    ========================= */
 
 function afficherPopupChampsManquants(champs) {
+    if (!Array.isArray(champs) || champs.length === 0) return;
   const popup = document.getElementById("popup-missing");
   const list = document.getElementById("missing-list");
 
@@ -1314,12 +1318,14 @@ function afficherPopupChampsManquants(champs) {
     list.appendChild(li);
   });
 
+  document.body.style.overflow = "hidden";
   popup.style.display = "flex";
 }
 
 function fermerPopupMissing() {
   const popup = document.getElementById("popup-missing");
   if (popup) popup.style.display = "none";
+  document.body.style.overflow = "";
 }
 
 </script>
@@ -1959,27 +1965,6 @@ function haversine(lat1, lon1, lat2, lon2) {
 
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
-  function afficherPopupChampsManquants(champs) {
-    const popup = document.getElementById("popup-missing");
-    const list = document.getElementById("missing-list");
-
-    if (!popup || !list) return;
-
-    list.innerHTML = "";
-
-    champs.forEach(champ => {
-      const li = document.createElement("li");
-      li.textContent = champ;
-      list.appendChild(li);
-    });
-
-    popup.style.display = "flex";
-  }
-
-  function fermerPopupMissing() {
-    const popup = document.getElementById("popup-missing");
-    if (popup) popup.style.display = "none";
-  }
 </script>
 <script>
 function minutesToHHMM(totalMinutes){
@@ -2237,38 +2222,63 @@ window.addEventListener("resize", () => {
 });
 </script>
 
-<!-- POPUP CHAMPS MANQUANTS -->
+<!-- POPUP CHAMPS MANQUANTS (MOBILE FRIENDLY) -->
 <div id="popup-missing" style="
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(100,100,100,0.4);
+  background:rgba(0,0,0,0.55);
   z-index:9999;
   align-items:center;
   justify-content:center;
 ">
+
   <div style="
     background:#de1062;
     color:#000;
-    padding:20px 25px;
-    border-radius:18px;
+    padding:18px 16px;
+    border-radius:16px;
+    width:92%;
     max-width:420px;
-    width:90%;
+    max-height:85vh;
+    overflow-y:auto;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
   ">
-    <h4 style="margin-top:0;text-align:center;">
-      ⚠️ POUR INFO: Les champs suivants ne sont pas renseignés ! 
+
+    <h4 style="margin-top:0;text-align:center;font-size:1.1rem;">
+      ⚠️ POUR INFO<br>
+      Les champs suivants ne sont pas renseignés
     </h4>
 
-    <ul id="missing-list" style="text-align:left; padding-left:20px;"></ul>
+    <ul id="missing-list" style="
+      text-align:left;
+      padding-left:18px;
+      margin:12px 0;
+      font-size:0.95rem;
+    "></ul>
 
-    <div style="text-align:center;margin-top:12px;">
-      <h4 style="margin-top:0;text-align:center;">
-      Remplissez les champs manquants & poursuivez votre FdR en cliquant ⬇️
+    <h4 style="text-align:center;font-size:1rem;margin:10px 0 14px;">
+      Remplissez les champs manquants<br>
+      puis poursuivez votre FdR
     </h4>
-      <button onclick="fermerPopupMissing()">J'ai compris</button>
-    </div>
+
+    <button onclick="fermerPopupMissing()" style="
+      width:100%;
+      padding:12px;
+      font-size:1rem;
+      font-weight:bold;
+      border-radius:12px;
+      border:none;
+      background:#1a73e8;
+      color:white;
+    ">
+      J’ai compris
+    </button>
+
   </div>
 </div>
+
+
 
 
 </body>
