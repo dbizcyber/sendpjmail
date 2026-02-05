@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>index</title>
+
+
+<style>
+  /* === index_index_5126_1049_05/02/26 === */
+body {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f4f9f9;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+h2 {
+  font-size: 1.4em;
+  padding: 8px 14px;
+  border-radius: 10px;
+  color: #fff;
+  margin-top: 30px;
+}
+
+h2:nth-of-type(1) { background-color: #7ec8e3; }
+h2:nth-of-type(2) { background-color: #a2d9ce; }
+h2:nth-of-type(3) { background-color: #f7d794; }
+h2:nth-of-type(4) { background-color: #c5b3e6; }
+h2:nth-of-type(5) { background-color: #81c784; }
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 15px;
+  background-color: #fff;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 3px rgba(126,200,227,0.2);
+}
+
+/* === Champs courts === */
+#date, 
+#heure-rv, 
+#duree, 
+#ibp, 
+#technicite, 
+#risque {
+  width: 180px;
+}
+
+#trajet-km, 
+#cout-autoroute {
+  width: 140px;
+}
+
+#organisateur h2 {
+  width: 300px;
+  color: #000;
+}
+
+/* Alignement horizontal pour certains groupes */
+div[style*="flex"] input,
+div[style*="flex"] select {
+  flex: 0 0 auto;
+}
+
+/* === Boutons === */
+button {
+  padding: 10px 22px;
+  background-color: #7ec8e3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #5fb0cf;
+}
+
+/* === Containers === */
+.resume-container {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 20px 0;
+}
+
+/* === Résumé === */
+#resultat {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  white-space: pre-wrap;
+  text-align: left !important;
+}
+
+/* === Messages d'erreur et dropdown === */
+.message-erreur {
+  display: none;
+  background-color: #e57373;
+  color: white;
+  padding: 5px;
+  margin-top: 5px;
+  border-radius: 4px;
+}
+
+.results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #ccc;
+  max-height: 180px;
+  overflow: auto;
+  background: #fff;
+  position: absolute;
+  width: calc(100% - 16px);
+  z-index: 1000;
+}
+
+.results li {
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.results li[aria-selected="true"] {
+  background: #e6f4f1;
+}
+
+.dropdown-wrap {
+  position: relative;
+}
+  .info-meteo {
+  margin: 6px 0;
+  font-size: 1em;
+}
+
+.info-meteo label {
+  
+  margin-right: 4px;
+}
+/* === Alignement à gauche des prévisions météo === */
+#meteo-openmeteo,
+#meteo-openmeteo * {
+  text-align: left !important;
+}
+label.small-label {
+  font-size: 16px;
+  text-align: left !important;
+}
+</style>
+<style>
+label, input{
+  display:inline;
+}
+</style>
+<!-- Leaflet CSS & JS (added for interactive map selection) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
+
+<!-- Le reste du contenu HTML et JS reste inchangé -->
+<!-- Copie intégrale du formulaire original avec ce style -->
+<!-- (Colle ici tout ton code HTML et JavaScript déjà présent dans newformrandos.htm) -->
+
+
+<h2>Modèle Feuille de Route</h2>
+<p>La sélection de votre rando s’effectue dès la saisie des premières lettres. Accents requis. Si elle n’apparaît pas, choisissez "Autre…" et saisissez votre titre.</p>
+
+<label for="rechercheRando">Recherche de randonnée :</label>
+<div class="dropdown-wrap">
+  <input id="rechercheRando" placeholder="Tapez 2 lettres pour filtrer..." autocomplete="off" inputmode="text" aria-autocomplete="list" aria-controls="resultsList" aria-expanded="false">
+  <ul id="resultsList" class="results" role="listbox" tabindex="-1" aria-label="Résultats" style="display:none"></ul>
+</div>
+
+<select id="nom" aria-hidden="true" style="display:none">
+  <option value="" disabled="" selected="">-- Choisir une randonnée --</option>
+  <!-- Exemple d'options, tu peux réinjecter la liste complète si besoin -->
+  <option value="Alpes de Haute Provence">Alpes de Haute Provence</option>
+  <option value="Ardèche">Ardèche</option>
+  <option value="Calanques">Calanques</option>
+  <option value="Drôme (provençale)">Drôme (provençale)</option>
+  <option value="Gard">Gard</option>
+  <option value="Luberon">Luberon</option>
+  <option value="Vaucluse">Vaucluse</option>
+  <option value="Var">Var</option>
+  <option value="Aiguebelle">Aiguebelle</option>
+  <option value="Alleins">Alleins</option>
+  <option value="Alpilles">Alpilles</option>
+  <option value="Alpilles : Les crêtes par le mont Gaussier">Alpilles : Les crêtes par le mont Gaussier</option>
+  <option value="Alpilles tour d'Auge">Alpilles tour d'Auge</option>
+  <option value="Alpilles, du lac de st Remy aux Baux">Alpilles, du lac de st Remy aux Baux</option>
+  <option value="Arche du Portalas depuis Bonnieux">Arche du Portalas depuis Bonnieux</option>
+  <option value="Au coeur de la Barthelasse">Au coeur de la Barthelasse</option>
+  <option value="Autour de Sivergues">Autour de Sivergues</option>
+  <option value="Autour du Château d'Allègre">Autour du Château d'Allègre</option>
+  <option value="Badarel">Badarel</option>
+  <option value="Balcons du Rhône au départ de Boulbon">Balcons du Rhône au départ de Boulbon</option>
+  <option value="Baumes de Venise">Baumes de Venise</option>
+  <option value="Baumeyrane les Baux">Baumeyrane les Baux</option>
+  <option value="Baux, Lac de St Rémy">Baux, Lac de St Rémy</option>
+  <option value="Beaucet ST Gens">Beaucet ST Gens</option>
+  <option value="Bedoin, les 5 bergeries">Bedoin, les 5 bergeries</option>
+  <option value="Bedoin, les 9 bergeries">Bedoin, les 9 bergeries</option>
+  <option value="Bergerie de l'avocat">Bergerie de l'avocat</option>
+  <option value="Bergeries sur les hauteurs de Villes-sur-Auzon;">Bergeries sur les hauteurs de Villes-sur-Auzon;</option>
+  <option value="Bérigoule Est">Bérigoule Est</option>
+  <option value="Bérigoule Ouest">Bérigoule Ouest</option>
+  <option value="Bois de St Martin. Départ : Le Garn 07">Bois de St Martin. Départ : Le Garn 07</option>
+  <option value="Bonnieux  -  Cadoucès">Bonnieux  -  Cadoucès</option>
+  <option value="Borie de Clapeyrouse à Saumane">Borie de Clapeyrouse à Saumane</option>
+  <option value="Boucle autour de Cairanne">Boucle autour de Cairanne</option>
+  <option value="Brame du Cerf dans le Ventoux">Brame du Cerf dans le Ventoux</option>
+  <option value="Buis les Baronnies - la Nible">Buis les Baronnies la Nible</option>
+  <option value="Buoux Fort et Pelat">Buoux Fort et Pelat</option>
+  <option value="Buoux, le rocher percé">Buoux, le rocher percé</option>
+  <option value="Cabane du mouflon - Savoillan">Cabane du mouflon - Savoillan</option>
+  <option value="Cabane du garde">Cabane du garde</option>
+  <option value="Cabrieres  d'Avignon - La forêt de cèdres - abbaye de Sénanque">Cabrieres  d'Avignon , La forêt de cèdres , abbaye de Sénanque</option>
+  <option value="Caisses JeanJean">Caisses JeanJean</option>
+  <option value="Capelle et Masmolène">Capelle et Masmolène</option>
+  <option value="Capitelles et castillones Aramon (30)">Capitelles et castillones Aramon (30)</option>
+  <option value="Capitelles Moulin de Carrière Uzès">Capitelles Moulin de Carrière Uzès</option>
+  <option value="Caroux">Caroux</option>
+  <option value="Cascades de Sautadet">Cascades de Sautadet</option>
+  <option value="Castillon du Gard">Castillon du Gard</option>
+  <option value="Chapelle de la Sainte Baume, la Montagne et la Plaine de Sabran">Chapelle de la Sainte Baume, la Montagne et la Plaine de Sabran</option>
+  <option value="Cirque des walkyries Marseille">Cirque des walkyries Marseille</option>
+  <option value="Clansayes (26)">Clansayes (26)</option>
+  <option value="Cluyer et les Aiguiers, départ de Saint Saturnin d'Apt">Cluyer et les Aiguiers, départ de Saint Saturnin d'Apt</option>
+  <option value="Collias par le vire des Chèvres">Collias par le vire des Chèvres</option>
+  <option value="Combe de Lioux">Combe de Lioux</option>
+  <option value="Combe Obscure et du Chat">Combe Obscure et du Chat</option>
+  <option value="Comps">Comps</option>
+  <option value="Vallon de Combres">Vallon de Combres</option>
+  <option value="Concluses de Lussan">Concluses de Lussan</option>
+  <option value="Côte bleue au départ de Port Mejean">Côte bleue au départ de Port Mejean</option>
+  <option value="Crête du Grand Luberon au départ de Vaugines">Crête du Grand Luberon au départ de Vaugines</option>
+  <option value="Crêtes Arfuyen et le Saint Amand, Crestet">Crêtes Arfuyen et le Saint Amand, Crestet</option>
+  <option value="Crêtes d’Arfuyen et Saint Amand,départ du col de la chaîne Dentelles de Montmirail">Crêtes d’Arfuyen et Saint Amand départ du col de la chaîne Dentelles de Montmirail</option>
+  <option value="Crêtes de Romanin par le mont Gaussier.">Crêtes de Romanin par le mont Gaussier.</option>
+  <option value="Crêtes des Alpilles">Crêtes des Alpilles</option>
+  <option value="Crêtes du Barroux">Crêtes du Barroux</option>
+  <option value="Crêtes du Ventoux">Crêtes du Ventoux</option>
+  <option value="Cucuron Mourre Nègre">Cucuron Mourre Nègre</option>
+  <option value="De Collias À Sainte Veredeme">De Collias À Sainte Veredeme</option>
+  <option value="Dentelles sarrasines et clapis">Dentelles sarrasines et clapis</option>
+  <option value="Départ Beaumes-de-Venise">Départ Beaumes-de-Venise</option>
+  <option value="Départ Saignon">Départ Saignon</option>
+  <option value="Tour des Dentelles">Tour des Dentelles</option>
+  <option value="Estezargues (30)">Estezargues (30)</option>
+  <option value="Eygalières boucle par les vallons">Eygalières boucle par les vallons</option>
+  <option value="Eygalieres petit et gros Calans">Eygalieres petit et gros Calans</option>
+  <option value="Eygalières, tour de la baume Brignolle">Eygalières, tour de la baume Brignolle</option>
+  <option value="Eygières Aureille">Eygières Aureille</option>
+  <option value="Falaise de Lioux">Falaise de Lioux</option>
+  <option value="Falaises et gorges du Gardon au départ de Collias">Falaises et gorges du Gardon au départ de Collias</option>
+  <option value="Fond de l'Orme, Mérindol">Fond de l'Orme, Mérindol</option>
+  <option value="Fontaine de Vaucluse">Fontaine de Vaucluse</option>
+  <option value="Forêt des cedres La Coste">Forêt des cedres La Coste</option>
+  <option value="Forêt domaniale Sault Col Abeilles">Forêt domaniale Sault Col Abeilles</option>
+  <option value="Garde Grosse Châteauneuf de Bordette">Garde Grosse Châteauneuf de Bordette</option>
+  <option value="Gardon rive droite, Chapelle l'Ermitage">Gardon rive droite, Chapelle l'Ermitage</option>
+  <option value="Gorges d’ Oppedette, abbaye de Valsainte, saut du moine">Gorges d’ Oppedette, abbaye de Valsainte, saut du moine</option>
+  <option value="Goult lumieres">Goult lumieres</option>
+  <option value="Grand barbeirol au départ de Crillon le Brave">Grand barbeirol au départ de Crillon le Brave</option>
+  <option value="Guidon du Bouquet (30)">Guidon du Bouquet (30)</option>
+  <option value="Hameaux ruinés de Tarlan et Poitevin">Hameaux ruinés de Tarlan et Poitevin</option>
+  <option value="Hauts de Gordes">Hauts de Gordes</option>
+  <option value="Hivernale dans le Ventoux - entre face sud et face nord">Hivernale dans le Ventoux - entre face sud et face nord</option>
+  <option value="Ile de la Barthelasse">Ile de la Barthelasse</option>
+  <option value="Lacoste">Lacoste</option>
+  <option value="Lacoste chapelle St Véran, abbaye de St Hilaire">Lacoste chapelle St Véran, abbaye de St Hilaire</option>
+  <option value="Lafare">Lafare</option>
+  <option value="Lagnes">Lagnes</option>
+  <option value="Lagnes, Fontaine de Vaucluse par l'aqueduc">Lagnes, Fontaine de Vaucluse par  l'aqueduc</option>
+  <option value="Lagon bleu Maussane">Lagon bleu Maussane</option>
+  <option value="Maussane">Maussane</option>
+  <option value="Lamanon Roquemartine">Lamanon Roquemartine</option>
+  <option value="Lance face Nord">Lance face Nord</option>
+  <option value="Lance par le rocher des aures">Lance par le rocher des aures</option>
+  <option value="Lauris">Lauris</option>
+  <option value="Lauris Cap de Serre (84)">Lauris Cap de Serre (84)</option>
+  <option value="Lioux, les falaises de la Madeleine">Lioux, les falaises de la Madeleine</option>
+  <option value="Luberon sud, le Bastidon du Roumiguier">Luberon sud, le Bastidon du Roumiguier</option>
+  <option value="Luberon, la Baume Martin">Luberon, la Baume Martin</option>
+  <option value="Malaucène, le Barroux">Malaucène, le Barroux</option>
+  <option value="Malemort du Comtat - La combe du diable">Malemort du Comtat - La combe du diable</option>
+  <option value="Marseilleveyre">Marseilleveyre</option>
+  <option value="Massif du Barry">Massif du Barry</option>
+  <option value="Matemale Pyrénées">Matemale Pyrénées</option>
+  <option value="Mayorque gorges de la peine">Mayorque gorges de la peine</option>
+  <option value="Mejanne le Clap L'aven Peyre Haute">Mejanne le Clap L'aven Peyre Haute</option>
+  <option value="Merindol la vallée du Dégoutau">Merindol la vallée du Dégoutau</option>
+  <option value="Mollans sur Ouvèze Pierrelongue">Mollans sur Ouvèze Pierrelongue</option>
+  <option value="Monieux, gorges de la Nesque">Monieux, gorges de la Nesque</option>
+  <option value="Mont Puget ">Mont Puget </option>
+  <option value="Montagne de Linceuil (26)">Montagne de Linceuil (26)</option>
+  <option value="Montagne de Miélandre">Montagne de Miélandre</option>
+  <option value="La montagne de Bluye Départ de St Léger">La montagne de Bluye Départ de St Léger</option>
+  <option value="Monts de Vaucluse Marignon">Monts de Vaucluse Marignon</option>
+  <option value="Mont Ventoux Chalet Reynard">Monts Ventoux Chalet Reynard </option>
+  <option value="Mornas (84)">Mornas (84)</option>
+  <option value="Moulin de Javon et les baumes de Eymians et de Roustan">Moulin de Javon et les baumes de Eymians et de Roustan</option>
+  <option value="Mourre Nègre">Mourre Nègre</option>
+  <option value="Mourre Nègre par Auribeau">Mourre Nègre par Auribeau</option>
+  <option value="Mourre nègre par Cucuron">Mourre nègre par Cucuron</option>
+  <option value="Mourre Nègre par Regain et la femme morte, Luberon (Nord)">Mourre Nègre par Regain et la femme morte, Luberon (Nord)</option>
+  <option value="Murs">Murs</option>
+  <option value="Nible Buis les Baronnies">Nible Buis les Baronnies</option>
+  <option value="Notre dame des neiges, la gacholle">Notre dame des neiges, la gacholle</option>
+  <option value="Ocres de Mormoiron">Ocres de Mormoiron</option>
+  <option value="Oppidum La garde d'Apt">Oppidum La garde d'Apt</option>
+  <option value="Orgon">Orgon</option>
+  <option value="Pas de la Frache">Pas de la Frache</option>
+  <option value="Pays d'Apt, Caseneuve, Colorado">Pays d'Apt, Caseneuve, Colorado</option>
+  <option value="Petit et gros Calan">Petit et gros Calan</option>
+  <option value="Pic de Bertagne">Pic de Bertagne</option>
+  <option value="Pic de Bertagne Gémenos">Pic de Bertagne Gémenos</option>
+  <option value="Pic de Faiendre">Pic de Faiendre</option>
+  <option value="Pic des Mouches au départ de Puyloubier">Pic des Mouches au départ de Puyloubier</option>
+  <option value="Pigeonnier. Départ : Eyguières">Pigeonnier. Départ : Eyguières</option>
+  <option value="Plateau d’ Orgon, chapelle de Beauregard">Plateau d’ Orgon, chapelle de Beauregard</option>
+  <option value="Plateau de Lacau et le camp de César">Plateau de Lacau et le camp de César</option>
+  <option value="Pont du gard">Pont du gard</option>
+  <option value="Portalas -  Ménerbes">Portalas -  Ménerbes</option>
+  <option value="Portalas depuis BONNIEUX">Portalas depuis BONNIEUX</option>
+  <option value="Promenade autour des Baux">Promenade autour des Baux</option>
+  <option value="Ramayettes au départ de Bédoin">Ramayettes au départ de Bédoin</option>
+  <option value="Rando d’Eyguieres à Lamanon par le Défens">Rando d’Eyguieres à Lamanon par le Défens</option>
+  <option value="Rando Gourmande">Rando Gourmande</option>
+  <option value="Raquettes à Forgeassoud">Raquettes à Forgeassoud</option>
+  <option value="Raquettes Matemale">Raquettes Matemale</option>
+  <option value="Raquettes Montclar">Raquettes Montclar</option>
+  <option value="Regalon , têtes des Buisses, gorge du Regalon">Regalon , têtes des Buisses, gorge du Regalon</option>
+  <option value="Reilhanette">Reilhanette</option>
+  <option value="Roche sur le Buis">Roche sur le Buis</option>
+  <option value="Rochers de la Madeleine et les ocres de Bedoin">Rochers de la Madeleine et les ocres de Bedoin</option>
+  <option value="Roque D'Anthéron Chemin Crêtes">Roque D'Anthéron Chemin Crêtes</option>
+  <option value="Russan - pont Saint Nicolas gorges du Gardon">Russan - pont Saint Nicolas gorges du Gardon</option>
+  <option value="Saint Andre d'Oleargues">Saint Andre d'Oleargues</option>
+  <option value="Saint Etienne du Grès Notre dame du chateau">Saint Etienne du Grès Notre dame du chateau</option>
+  <option value="Saint Gens Combe de Capellan">Saint Gens Combe de Capellan</option>
+  <option value="Saint Hubert au départ du lac de Monieux">Saint Hubert au départ du lac de Monieux</option>
+  <option value="Saint Victor la Coste">Saint Victor la Coste</option>
+  <option value="Sainte Victoire par le sentier des Plaideurs">Sainte Victoire par le sentier des Plaideurs</option>
+  <option value="Sainte Victoire versant Sud, Les Clapiers">Sainte Victoire versant Sud, Les Clapiers</option>
+  <option value="Sainte-Victoire">Sainte-Victoire</option>
+  <option value="Sainte-Victoire versant Nord par le sentier des Plaideurs">Sainte-Victoire versant Nord par le sentier des Plaideurs</option>
+  <option value="Séguret : collines et vignobles">Séguret : collines et vignobles</option>
+  <option value="Séjour Ardèche La bombine">Séjour Ardèche La bombine</option>
+  <option value="Sentier des baliseurs dans les Alpilles">Sentier des baliseurs dans les Alpilles</option>
+  <option value="Simiane La Rotonde">Simiane La Rotonde</option>
+  <option value="Sivergues: le vallon de Petarelle, la crête et le défilé du rocher">Sivergues: le vallon de Petarelle, la crête et le défilé du rocher</option>
+  <option value="Sommet des Fourcats, départ Robion">Sommet des Fourcats, départ Robion</option>
+  <option value="Source Aramon">Source Aramon</option>
+  <option value="St Gens et la combe de Capellan">St Gens et la combe de Capellan</option>
+  <option value="St Saturnin les Apt - Le sentier des Aiguiers par le Cluyer">St Saturnin les Apt - Le sentier des Aiguiers par le Cluyer</option>
+  <option value="Tallagard et le vieux vernegues.">Tallagard et le vieux vernegues.</option>
+  <option value="Teyssières, le Cougoir">Teyssières, le Cougoir</option>
+  <option value="Theziers Gard Land's (30)">Theziers Gard Land's (30)</option>
+  <option value="Tour des étangs">Tour des étangs</option>
+  <option value="Tour des Opies retour par Civadiers">Tour des Opies retour par Civadiers</option>
+  <option value="Tour du guet (Aureille) les Civadières">Tour du guet (Aureille) les Civadières</option>
+  <option value="Tour Philipe">Tour Philipe</option>
+  <option value="Trou du furet et montagne du Serre (Drome )">Trou du furet et montagne du Serre (Drome )</option>
+  <option value="Vaison la romaine le Crestet">Vaison la romaine le Crestet</option>
+  <option value="Vallée de l'Eure (Uzes)">Vallée de l'Eure (Uzes)</option>
+  <option value="Vallon de l'aiguille, la forêt de cèdre">Vallon de l'aiguille, la forêt de cèdre</option>
+  <option value="Vallon des amants (Alpilles)">Vallon des amants (Alpilles)</option>
+  <option value="Vallons et crètes autour du Barroux">Vallons et crètes autour du Barroux</option>
+  <option value="Vaumalle: Véroncle à Joucas">Vaumalle: Véroncle à Joucas</option>
+  <option value="Venasque la combe de Capellan">Venasque la combe de Capellan</option>
+  <option value="Ventabren">Ventabren</option>
+  <option value="Ventouret">Ventouret</option>
+  <option value="Mont Ventoux, les Abeilles">Ventoux, les Abeilles</option>
+  <option value="Mont Ventoux, pavillon Rolland">Ventoux, pavillon Rolland</option>
+  <option value="Viens, hameaux et chapelles">Viens, hameaux et chapelles</option>
+  <option value="Village des Bories, Senancole, Senanque, vallon grande combe">Village des Bories, Senancole, Senanque, vallon grande combe</option>
+  <option value="Villages des dentelles au départ de Lafare">Villages des dentelles au départ de Lafare</option>
+  <option value="Ville/Auzon combe des Escampeaux, bergerie">Ville/Auzon combe des Escampeaux, bergerie</option>
+  <option value="Le chemin des Indochinois">Le chemin des Indochinois</option>
+  <option value="autre">Autre… (saisir manuellement)</option>
+
+  
+  <!-- si tu veux toutes les options, réinsère ta liste complète ici -->
+</select>
+
+<input id="autreNomRando" placeholder="Saisir le nom de la randonnée" style="display:none;width:100%;font-weight:bold;margin-top:6px">
+
+<hr>
+<label for="date">Date de la randonnée :</label>
+<input type="date" id="date" onchange="afficherJour()">
+<label>Jour de la semaine : <span id="jour-semaine"></span></label>
+
+<hr>
+<h2>Parkings</h2>
+<label for="lieu">Parking Covoiturage (modifiable)</label>
+<select id="lieu" onchange="gererAutreLieu(); setHomeFromParking();" style="font-weight: bold;">
+  <option value="" selected="" hidden="">Choisir un parking</option>
+  <option value="Parking Bricomarché - Châteaurenard">Parking Bricomarché - Châteaurenard</option>
+  <option value="Parking MIN - Châteaurenard">Parking MIN - Châteaurenard</option>
+  <option value="Parking du Stade - Châteaurenard">Parking du Stade - Châteaurenard</option>
+  <option value="Parking Super U - Châteaurenard">Parking Super U - Châteaurenard</option>
+    <option value="Parking des Allées - Châteaurenard">Parking des Allées - Châteaurenard</option>
+  <option value="autre">Autre... (saisir manuellement)</option>
+</select>
+<input type="text" id="autreLieu" maxlength="100" placeholder="Entrez un autre parking" style="display:none; margin-top:0.5rem; color:red; font-weight:bold;">
+
+<div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-top:10px;">
+  <label for="heure-rv">Heure de rendez-vous (hh:mm) :</label>
+  <input type="time" id="heure-rv" onchange="calculerHeureDepart()">
+  <label><strong>Heure de départ prévue : <span id="heure-depart"></span></strong></label>
+</div>
+
+<label for="description">Trajet suggéré :</label>
+<textarea id="description" rows="2" maxlength="1000"></textarea>
+
+<label for="parking-depart" class="small-label">Parking de départ Randonnée : (Tapez les 4 premières lettres : chalet, col, parking, nom de village... et département si homonynie, le retour du serveur n'est pas instantané ! Et ajustez, éventuellement le parking avec votre souris sur la carte)</label>
+
+<input type="text" id="parking-depart" list="parkings-list" placeholder="Parking départ randonnée" autocomplete="off">
+
+<datalist id="parkings-list"></datalist>
+
+
+<button type="button" onclick="updateParkingMap()">Afficher le parking et la meteo sous la carte </button>
+
+<!-- La carte apparaîtra ici + bouton recentrer trajet -->
+<div id="parkingMap" style="display:none; margin-top:15px; width:100%; height:400px; border-radius:10px; overflow:hidden;"></div>
+<!-- Bouton Recentrer : utilisation d'onclick pour fiabilité -->
+<button type="button" id="btn-recentrer-trajet" style="display:none; margin-top:10px;" onclick="recenterRoute()">
+  📍 Recentrer sur le trajet
+</button>
+
+<!-- ✅ MÉTÉO OPEN-METEO -->
+<h2>🌦️ Météo au parking de départ - prévisions à 7 jours </h2>
+<div class="info-meteo">
+  <label>Note :</label>
+  <span>
+    Si le jour de rando est inclus dans l’intervalle, la prévision sera
+    surlignée en jaune puis directement intégrée
+    dans la Feuille de Route.
+  </span>
+  </div>
+<div id="meteo-openmeteo" style="display:none;margin-top:15px;padding:12px;border-radius:10px;background:#eef7f7;">
+  <div id="meteo-current"></div>
+  <div id="meteo-forecast"></div>
+</div>
+
+<hr>
+</h5><h2>Coûts</h2>
+<div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;">
+  <label for="trajet-km">Trajet en km :</label>
+  <input type="number" id="trajet-km" oninput="calculerCouts()">
+  <label for="cout-autoroute">Coût de l'autoroute (€) :</label>
+  <input type="number" id="cout-autoroute" oninput="calculerCouts()">
+</div>
+<p>Trajet : <strong><span id="total-trajet">0</span> €</strong>
+------  Total avec Autoroute : <strong><span id="cout-total">0</span> €</strong></p>
+<p>Coût covoiturage (par 4) : <span id="covoit4">0</span> € ------- (par 5) : <span id="covoit5">0</span> €</p>
+
+<hr>
+<h2>Informations techniques</h2>
+<style>
+  /* Conteneur général du formulaire */
+  .form-wrapper {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* Blocs rando (distance, dénivelé, durée) */
+  .bloc-form {
+    margin-bottom: 1.2rem;
+    text-align: center;
+  }
+
+  .bloc-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+  }
+
+  .bloc-form input {
+    display: block;
+    margin: 0.4rem auto 0 auto;
+    width: 70%;
+    min-width: 110px;
+    padding: 6px 8px;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+
+  /* Couleurs spécifiques */
+  .bloc-distance label, .bloc-distance input {
+    color: #1b8a2f;
+    border: 2px solid #1b8a2f;
+    font-weight: bold;
+  }
+
+  .bloc-denivele label, .bloc-denivele input {
+    color: #005bbb;
+    border: 2px solid #005bbb;
+    font-weight: bold;
+  }
+  .bloc-duree label,
+  .bloc-duree input, .bloc-duree input {
+    border: 2px solid #555;
+    font-weight: bold;
+  }
+
+  /* Blocs IBP / Technicité / Risque / Remarques */
+  .bloc-champ {
+    margin-bottom: 1.2rem;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .bloc-champ label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+  }
+
+  .bloc-champ input,
+  .bloc-champ textarea {
+    display: block;
+    width: 80%;
+    max-width: 350px;
+    margin: 0.3rem auto;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 2px solid #555;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .message-erreur {
+    color: red;
+    font-size: 0.9rem;
+    display: none;
+    margin-top: 0.3rem;
+  }
+
+  /* Paragraphes suivants (mise en page normale) */
+  .contenu-normal {
+    text-align: left;
+    margin: 1rem auto;
+    max-width: 700px; /* largeur confortable sur desktop */
+  }
+
+  .contenu-normal p {
+    margin-bottom: 1rem;
+  }
+  .meteo-rando-day {
+  background: #fff3cd;
+  border-left: 5px solid #f0ad4e;
+  padding: 6px;
+  border-radius: 6px;
+}
+#profil-altimetrique {
+  width: 100%;
+  max-width: 100%;
+}
+
+#elevationChart {
+  width: 100% !important;
+  height: 35vh !important;   /* MOBILE */
+  max-height: 260px;
+}
+
+@media (min-width: 768px) {
+  #elevationChart {
+    height: 320px !important; /* DESKTOP */
+  }
+}
+.slope-legend {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:0.9rem;
+  margin-top:8px;
+}
+
+.slope-legend .gradient {
+  width:140px;
+  height:10px;
+  border-radius:6px;
+  background:linear-gradient(to right, orange, red);
+}
+.titre-section {
+  background-color: #e6f1f1;
+  color: #2f4f4f;
+}
+
+
+</style>
+
+<!-- === IMPORT GPX & CALCUL IBP === -->
+  <form enctype="multipart/form-data" id="formuploadajax">
+      <label class="small-label" style="display:block; text-align:left;">
+  Importez votre fichier GPX
+</label>
+    
+    <input type="file" id="file" name="file" accept=".gpx" required>
+    <br><br>
+    <div class="bloc-champ" style="margin-bottom:2rem;">
+  <label class="small-label" style="display:block; text-align:left;">
+  L’analyse fournit automatiquement : Distance, Dénivelé +,
+  Durée (si disponible) et IBP (HKG). 
+  La création du profil altimétrique est immédiate, il sera joint en PJ avec le mail.
+</label>
+    <button type="submit">Analyser le fichier GPX</button>
+  </form>
+
+  <p id="gpx-status" style="font-weight:bold;margin-top:8px;"></p>
+</div>
+<!-- === FIN IMPORT GPX === -->
+
+
+<!-- FORMULAIRE -->
+<div class="form-wrapper">
+
+  <div class="bloc-form bloc-distance">
+    <label for="km">Distance de la randonnée - marche (km) :</label>
+    <input type="number" id="km" onchange="verifierInfos(); ajusterLargeur(this);" oninput="verifierInfos(); ajusterLargeur(this);">
+  </div>
+
+  <div class="bloc-form bloc-denivele">
+    <label for="denivele">Dénivelé (mètres) :</label>
+    <input type="number" id="denivele" onchange="verifierInfos(); ajusterLargeur(this);" oninput="verifierInfos(); ajusterLargeur(this);">
+  </div>
+
+  <div class="bloc-form bloc-duree">
+    <label for="duree">Durée totale (hh:mm) :</label>
+    <input type="text" id="duree" placeholder="hh:mm">
+  </div>
+
+</div>
+<!-- FIN km rando denivele et duree -->
+
+<div class="bloc-champ">
+  <label for="ibp">IBP (HKG) :</label>
+  <input type="number" id="ibp" oninput="afficherIBP()">
+  <p>
+    <strong>
+    Effort (IBP) : <span id="effort">❌ IBP non renseigné</span>
+  </strong>
+  </p>
+  </div>
+
+<div class="bloc-champ">
+  <label for="technicite">Technicité (1-5) :</label>
+  <input type="number" id="technicite" oninput="validerChamp('technicite'); afficherDifficulte('technicite','technicite-label');" min="1" max="5">
+  <p><strong>Technicité : <span id="technicite-label">❌ Non renseigné</span></strong></p>
+  <p id="technicite-erreur" class="message-erreur">Veuillez entrer une valeur entre 1 et 5.</p>
+</div>
+
+<div class="bloc-champ">
+  <label for="risque">Risque (1-5) :</label>
+  <input type="number" id="risque" oninput="validerChamp('risque'); afficherRisque('risque','risque-label');" min="1" max="5">
+  <p><strong>Risque : <span id="risque-label">❌ Non renseigné</span></strong></p>
+  <p id="risque-erreur" class="message-erreur">Veuillez entrer une valeur entre 1 et 5.</p>
+</div>
+
+<div class="contenu-normal">
+  <label for="remarques"><strong>Remarques &amp; particularités (texte jusqu'à 5000 caractères) :</strong></label>
+  <textarea id="remarques" rows="4" maxlength="2000"></textarea>
+</div>
+<!-- ajout heure depart et vitesse-->
+
+<h3 class="titre-section">Simulation</h3>
+    <div class="contenu-normal" style="margin-top:1rem;">
+  <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:center;">
+ <div>
+      <label for="heure-depart-rando"><strong>Heure de départ :</strong></label><br>
+      <input type="time" id="heure-depart-rando" step="60">
+    </div>
+
+    <div>
+      <label for="vitesse"><strong>Vitesse moyenne (km/h) :</strong></label><br>
+      <input type="number" id="vitesse" min="1" max="10" step="0.1" placeholder="ex : 4.2">
+    </div>
+  <div>
+      <label for="duree-deplacement"><strong>Durée en déplacement :</strong></label><br>
+      <input type="text" id="duree-deplacement" readonly
+             style="background:#f0f0f0; font-weight:bold;">
+    </div>
+  </div>
+</div>
+<div id="profil-altimetrique" style="width:100%; max-width:100%;">
+  <canvas id="elevationChart"></canvas>
+</div>
+  <!-- ⬇️ ICI : juste sous le profil -->
+  <button id="exportProfilJPG">
+    Exporter le profil altimétrique (JPG)
+  </button>
+</div>
+<div class="slope-legend">
+  <span> Pentes + : 0 %</span>
+  <div class="gradient"></div>
+  <span>≥ 20 %</span>
+</div>
+
+
+ <!-- fin mise en page  km rando denivele et duree -->
+
+<!-- PARAGRAPHES SUIVANTS AVEC MISE EN PAGE NORMALE -->
+<!-- <div class="contenu-normal">
+  <p>Voici un paragraphe normal après le formulaire. Il est aligné à gauche et n’est pas affecté par le centrage du formulaire.</p>
+  <p>Un autre paragraphe, également à gauche, avec son espacement naturel.</p>
+</div> -->
+
+<hr>
+<h2 style="color:black;">Organisateur</h2>
+<label for="organisateur">Choisissez un organisateur :</label>
+<select id="organisateur" onchange="afficherOrganisateur()" style="font-size:15px;padding:6px;height:34px;line-height:20px;border-radius:6px;">
+  <option value="">-- Sélectionnez --</option>
+  <option value="Pierre Camille ALEZINA 06 03 18 76 16">ALEZINA Pierre Camille  06 03 18 76 16</option>
+  <option value="Dominique BIZARD 06 88 00 15 85">BIZARD Dominique 06 88 00 15 85</option>
+  <option value="André BRIOUDE 06 84 53 70 30">BRIOUDE André 06 84 53 70 30</option>
+  <option value="Nadine BRUN 06 82 48 72 61">BRUN Nadine 6 82 48 72 61</option>
+  <option value="ChristianCIBRARIO 07 81 69 66 16">CIBRARIO Christian 07 81 69 66 16</option>
+  <option value="Roland DUPRÉ 06 52 88 26 57">DUPRÉ Roland 06 52 88 26 57</option>
+  <option value="Marie-Ange DUVERNE 06 29 12 33 65">DUVERNE Marie-Ange 06 29 12 33 65</option>
+  <option value="Sylvie ELISSALDE 06 77 91 03 61">ELISSALDE Sylvie 06 77 91 03 61</option>
+  <option value="Henri FABRE 06 09 89 02 67">FABRE Henri 06 09 89 02 67</option>
+  <option value="Brigitte GRANDPERRIN 06 24 75 90 59">GRANDPERRIN Brigitte 06 24 75 90 59</option>
+  <option value="Bernard GRANGE 06 21 56 59 70"> GRANGE Bernard 06 21 56 59 70</option>
+  <option value="Jean-Luc HERVÉ 07 68 60 38 59">HERVÉ Jean-Luc 07 68 60 38 59</option>
+  <option value="Bernadette JOUVE 06 74 49 96 90">JOUVE Bernadette 06 74 49 96 90</option>
+  <option value="Pierre MARTIN 06 08 23 62 85">MARTIN Pierre 06 08 23 62 85</option>
+  <option value="Annick NOUGUIER 06 87 39 93 86">NOUGUIER Annick 06 87 39 93 86</option>
+  <option value="Michel PALLIER 06 87 92 53 80"> PALLIER Michel 06 87 92 53 80</option>
+  <option value="Marianne POMMER 06 62 17 63 49">POMMER Marianne 06 62 17 63 49</option>
+  <option value="Yves RAOULX 07 66 59 74 00">RAOULX Yves 07 66 59 74 00</option>
+  <option value="Didier RAYNAL 06 80 94 09 42">RAYNAL Didier 06 80 94 09 42</option>
+  <option value="Jean-Louis REYNIER 06 13 09 29 14">REYNIER Jean-Louis 06 13 09 29 14</option>
+  <option value="Catherine TAUSSIG 06 20 42 54 33">TAUSSIG Catherine 06 20 42 54 33</option>
+  <option value="Jean-Claude VALDARCHI 06 25 70 49 05">VALDARCHI Jean-Claude 06 25 70 49 05</option>
+  <option value="TEST 06 01 02 03 04">TEST 06 01 02 03 04</option>
+  <!-- Ajoute la liste complète si besoin -->
+</select>
+<p>Organisateur : <span id="organisateur-label">❌ Non renseigné</span></p>
+
+<hr>
+<!-- Bouton unique -->
+<button id="btn-generer" type="button">1-Générer le résumé</button>
+<br><br>
+<!-- insertion pour saisie usermail -->
+<div class="bloc-champ">
+  <label for="emailUtilisateur">
+    Vous souhaitez recevoir une copie, saisissez votre adresse :
+  </label>
+  <input
+    type="email"
+    id="emailUtilisateur"
+    placeholder="exemple@email.com"
+    onblur="verifierEmail()"
+  >
+  <div id="emailErreur" class="message-erreur">
+    Adresse email non valide
+  </div>
+</div>
+
+<br><br>
+<button type="button" onclick="envoyerEmail()">2-Envoyer automatiquement</button>
+<br><br>
+<div id="resultat" aria-live="polite"></div>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+
+<!-- Script unique et ordonné -->
+<script>
+  let gpxImporte = false;
+  window.gpxImporte = false;
+
+
+  window.meteoJourRando = null;
+
+  function getDateRando(){
+  const el = document.getElementById("date");
+  if(!el || !el.value) return null;
+  return el.value.slice(0, 10); // YYYY-MM-DD
+}
+function normalizeDate(d){
+  if(!d) return null;
+  return d.toString().slice(0, 10); // YYYY-MM-DD
+}
+
+
+/* --- Recherche rando (autocomplétion légère) --- */
+const selectBackup = document.getElementById('nom');
+const baseOptions = Array.from(selectBackup.options).map(o => ({value: o.value, text: o.text}));
+const recherche = document.getElementById('rechercheRando');
+const resultsList = document.getElementById('resultsList');
+const champAutre = document.getElementById('autreNomRando');
+
+function normalize(s){ return (s||'').normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase() : (s||'').toLowerCase(); }
+
+function renderList(items, highlightIndex=-1){
+  resultsList.innerHTML = '';
+  if(items.length===0){
+    const li=document.createElement('li'); li.className='no-results'; li.textContent='Aucun résultat'; resultsList.appendChild(li);
+  } else {
+    items.forEach((it,idx)=>{
+      const li=document.createElement('li'); li.setAttribute('role','option'); li.dataset.value=it.value; li.textContent=it.text;
+      if(idx===highlightIndex) li.setAttribute('aria-selected','true');
+      resultsList.appendChild(li);
+    });
+  }
+  const aut = baseOptions.find(o=>o.value==='autre');
+  if(aut){ const li=document.createElement('li'); li.setAttribute('role','option'); li.dataset.value=aut.value; li.textContent=aut.text; resultsList.appendChild(li); }
+  resultsList.style.display='block';
+  recherche.setAttribute('aria-expanded','true');
+}
+function hideList(){ resultsList.style.display='none'; recherche.setAttribute('aria-expanded','false'); clearHighlight(); }
+function resetAll(){ hideList(); champAutre.style.display='none'; champAutre.value=''; }
+
+recherche.addEventListener('input', ()=>{
+  const q=recherche.value.trim();
+  if(q.length===0){ resetAll(); return; }
+  const qn=normalize(q);
+  const found = baseOptions.filter(o=>o.value && o.value!=='autre').filter(o=>normalize(o.text).includes(qn));
+  renderList(found);
+});
+
+function chooseItem(value, text){
+  if(value==='autre'){ champAutre.style.display='block'; champAutre.value=''; champAutre.focus(); recherche.value=''; }
+  else { recherche.value = text; }
+  hideList();
+  try{ selectBackup.value = value; }catch(e){}
+}
+
+resultsList.addEventListener('click',(ev)=>{ const li=ev.target.closest('li[role="option"]'); if(!li) return; chooseItem(li.dataset.value, li.textContent); });
+resultsList.addEventListener('touchstart',(ev)=>{ const li=ev.target.closest('li[role="option"]'); if(!li) return; ev.preventDefault(); chooseItem(li.dataset.value, li.textContent); },{passive:false});
+
+let highlight = -1;
+function clearHighlight(){ highlight=-1; Array.from(resultsList.querySelectorAll('li[role="option"]')).forEach(li=>li.removeAttribute('aria-selected')); }
+function updateHighlight(delta){ const items=Array.from(resultsList.querySelectorAll('li[role="option"]')); if(items.length===0) return; highlight = Math.max(0,Math.min(items.length-1, highlight+delta)); items.forEach((li,i)=>{ if(i===highlight){ li.setAttribute('aria-selected','true'); li.scrollIntoView({block:'nearest'}); } else li.removeAttribute('aria-selected'); }); }
+recherche.addEventListener('keydown',(ev)=>{ if(resultsList.style.display==='none') return; if(ev.key==='ArrowDown'){ ev.preventDefault(); updateHighlight(+1); } else if(ev.key==='ArrowUp'){ ev.preventDefault(); updateHighlight(-1); } else if(ev.key==='Enter'){ ev.preventDefault(); const items=Array.from(resultsList.querySelectorAll('li[role="option"]')); if(items[highlight]) chooseItem(items[highlight].dataset.value, items[highlight].textContent); } else if(ev.key==='Escape'){ hideList(); } });
+document.addEventListener('click',(ev)=>{ if(!ev.target.closest('.dropdown-wrap') && ev.target !== champAutre) hideList(); });
+
+/* --- divers utilitaires d'affichage --- */
+
+function afficherJour(){
+  const date = document.getElementById("date").value;
+  if(date){ const jour = new Date(date).toLocaleDateString('fr-FR',{weekday:'long'}); document.getElementById("jour-semaine").textContent = jour.charAt(0).toUpperCase()+jour.slice(1); }
+}
+function calculerHeureDepart(){
+  const h=document.getElementById("heure-rv").value;
+  if(h){ const [hours,minutes]=h.split(':').map(Number); const d=new Date(); d.setHours(hours, minutes+15); document.getElementById("heure-depart").textContent = d.toTimeString().substring(0,5); }
+}
+function calculerCouts(){
+  const km=parseFloat(document.getElementById("trajet-km").value) || 0;
+  const autoroute=parseFloat(document.getElementById("cout-autoroute").value) || 0;
+  const totalTrajet = km * 0.3;
+  const coutTotal = totalTrajet + autoroute;
+  document.getElementById("total-trajet").textContent = totalTrajet.toFixed(2);
+  document.getElementById("cout-total").textContent = coutTotal.toFixed(2);
+  document.getElementById("covoit4").textContent = (coutTotal/4).toFixed(2);
+  document.getElementById("covoit5").textContent = (coutTotal/5).toFixed(2);
+}
+function afficherIBP(){
+  const ibp = parseInt(document.getElementById("ibp").value) || 0;
+  const effort = document.getElementById("effort");
+  if(ibp < 25) effort.textContent = "🟢 1 (Facile)";
+  else if(ibp <= 50) effort.textContent = "🔵 2 (Assez Facile)";
+  else if(ibp <= 75) effort.textContent = "🟠 3 (Peu Difficile)";
+  else if(ibp <= 100) effort.textContent = "🔴 4 (Assez Difficile)";
+  else effort.textContent = "⚫️ 5 ( 😅 Difficile)";
+}
+function afficherDifficulte(id,label){ const niveaux=["Facile","Assez Facile","Peu Difficile","Assez Difficile","Difficile"]; const v=document.getElementById(id).value; document.getElementById(label).textContent = niveaux[v-1] || "Non renseigné"; }
+function afficherRisque(id,label){ const niveaux=["Faible","Assez Faible","Peu Élevé","Assez Élevé","Élevé"]; const v=document.getElementById(id).value; document.getElementById(label).textContent = niveaux[v-1] || "Non renseigné"; }
+function afficherOrganisateur(){ const o=document.getElementById("organisateur").value; document.getElementById("organisateur-label").textContent = o || "Non renseigné"; }
+function gererAutreLieu(){ const s=document.getElementById('lieu'); const a=document.getElementById('autreLieu'); if(s.value==='autre'){ a.style.display='block'; a.focus(); } else { a.style.display='none'; a.value=''; } }
+
+/* --- validation & UI helpers --- */
+function ajusterLargeur(input){ const valeur = input.value ?? ""; const len = String(valeur).length; const minChars = 6; const maxChars = 18; const extra = 1; const target = Math.min(Math.max(len, minChars), maxChars) + extra; input.style.width = target + "ch"; }
+function verifierInfos(){ const kmInput=document.getElementById('km'); const deniveleInput=document.getElementById('denivele'); const km=parseFloat(kmInput.value)||0; const denivele=parseFloat(deniveleInput.value)||0;
+  if(km>0 && km<13) afficherBulle("Pas mal, mais vous pouvez mieux faire 😉", kmInput);
+  if(km>=13 && km<20) afficherBulle("c'est bien, tout le monde va adorer 😉", kmInput);
+  if(km>=20) afficherBulle("Trop fort, êtes-vous sûr de terminer le parcours 😂?", kmInput);
+  if(denivele>0 && denivele<500) afficherBulle("Encore un effort 🤪, allez !", deniveleInput);
+  if(denivele>=500) afficherBulle("Vous allez atteindre des sommets 😀, bravo !", deniveleInput);
+}
+function afficherBulle(texte,cible){ const bulle=document.createElement('div'); bulle.textContent=texte; bulle.style.position='absolute'; bulle.style.background='#1a73e8'; bulle.style.color='white'; bulle.style.padding='6px 10px'; bulle.style.borderRadius='8px'; bulle.style.fontSize='0.9rem'; bulle.style.whiteSpace='nowrap'; bulle.style.boxShadow='0 2px 6px rgba(0,0,0,0.3)'; bulle.style.transition='opacity 0.5s'; bulle.style.opacity='1';
+  const rect=cible.getBoundingClientRect(); const scrollY = window.scrollY || document.documentElement.scrollTop; bulle.style.left = (rect.left) + 'px'; bulle.style.top = (rect.top + scrollY - 35) + 'px'; bulle.style.zIndex=1000; document.body.appendChild(bulle);
+  setTimeout(()=>{ bulle.style.opacity='0'; setTimeout(()=>bulle.remove(),500); },4000);
+}
+
+function validerChamp(id){ const champ=document.getElementById(id); const valeur=parseInt(champ.value,10); const messageErreurId=id+'-erreur'; let messageErreur=document.getElementById(messageErreurId); if(!messageErreur){ messageErreur=document.createElement('p'); messageErreur.id=messageErreurId; messageErreur.className='message-erreur'; messageErreur.style.color='white'; messageErreur.style.backgroundColor='red'; messageErreur.style.padding='5px'; messageErreur.style.borderRadius='3px'; messageErreur.style.fontSize='0.9em'; messageErreur.style.marginTop='5px'; champ.parentNode.insertBefore(messageErreur, champ.nextSibling); } if(isNaN(valeur) || valeur<1 || valeur>5){ messageErreur.textContent='Veuillez entrer une valeur entre 1 et 5.'; messageErreur.style.display='block'; } else messageErreur.style.display='none'; }
+
+document.addEventListener('DOMContentLoaded', function(){
+  // liaison bouton générer
+  const btn = document.getElementById('btn-generer');
+  if(btn){ btn.addEventListener('click', function(e){ e.preventDefault(); genererTexte(); }); }
+  // liaison validation nombre
+  ["trajet-km","cout-autoroute","km","denivele","ibp"].forEach(id=>{ const champ=document.getElementById(id); if(champ){ champ.addEventListener('input', ()=> validerNumerique(id)); }});
+  // adapt width initial
+  document.querySelectorAll("#km,#denivele").forEach(el=>ajusterLargeur(el));
+});
+function resizeCanvasToScreen() {
+  const canvas = document.getElementById("elevationChart");
+  if (!canvas) return;
+
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight || 300;
+}
+/* --- utilitaires pour le résumé --- */
+function getNomRando(){ const select = document.getElementById('nom'); const autre = document.getElementById('autreNomRando'); return (select && select.value==='autre') ? (autre ? autre.value.trim() : '') : (select ? select.value : (document.getElementById('rechercheRando').value || '')); }
+function getValeurOuRouge(elementId, isText=false){ const el=document.getElementById(elementId); const valeur = el ? (isText ? el.textContent : el.value) : ''; return (valeur && String(valeur).trim()) ? valeur : '<span style="color:red">Non renseigné</span>'; }
+function getLibelleTechnicite(valeur){ const niveaux=["Facile","Assez Facile","Peu Difficile","Assez Difficile","😅 Difficile"]; return niveaux[valorToIndex(valeur)] || "Non renseigné"; }
+function getLibelleRisque(valeur){ const niveaux=["Faible","Assez Faible","Peu Élevé","Assez Élevé","😅 Élevé"]; return niveaux[valorToIndex(valeur)] || "Non renseigné"; }
+function valorToIndex(v){ return (typeof v==='number' && v>=1 && v<=5) ? v-1 : -1; }
+
+/* --- champs manquants --- */
+function estVide(valeur) {
+  return (
+    valeur === null ||
+    valeur === undefined ||
+    valeur === "" ||
+    valeur === 0 ||
+    valeur === "0" ||
+    valeur.toString().includes("Non renseigné")
+  );
+}
+
+
+/* --- fonction principale : génère le texte -> sécurisée --- */
+function genererTexte(){
+  if (!verifierChampsAvantEnvoi()) {
+    return;
+  }
+  const nomRando = getNomRando() || '<span style="color:red">Non renseigné</span>';
+  const dateVal = document.getElementById("date").value;
+  const dateFormatted = dateVal ? new Date(dateVal).toLocaleDateString("fr-FR") : '<span style="color:red">Non renseigné</span>';
+  const jour = document.getElementById("jour-semaine").textContent || '';
+
+  const selectLieu = document.getElementById("lieu");
+  let lieuRV = '<span style="color:red">Non renseigné</span>';
+  if(selectLieu){
+    if(selectLieu.value === 'autre'){ const autreLieu = document.getElementById('autreLieu'); if(autreLieu && autreLieu.value.trim()) lieuRV = autreLieu.value.trim(); }
+    else if(selectLieu.value) lieuRV = selectLieu.value;
+  }
+
+  const heureRV = getValeurOuRouge("heure-rv");
+  const heureDepart = document.getElementById("heure-depart").textContent || '<span style="color:red">Non renseigné</span>';
+  const description = getValeurOuRouge("description");
+  const trajetkm = getValeurOuRouge("trajet-km");
+  const parkingDepart = getValeurOuRouge("parking-depart");
+  const totalTrajet = document.getElementById("total-trajet")?.textContent || "0";
+  const coutAutoroute = document.getElementById("cout-autoroute")?.value || "0";
+  const coutTotal = document.getElementById("cout-total")?.textContent || "0";
+  const covoit4 = document.getElementById("covoit4")?.textContent || "0";
+  const covoit5 = document.getElementById("covoit5")?.textContent || "0";
+  const km = document.getElementById("km")?.value || "0";
+  const denivele = document.getElementById("denivele")?.value || "0";
+  const duree = getValeurOuRouge("duree");
+  const ibp = document.getElementById("ibp")?.value || "0";
+  const effort = document.getElementById("effort")?.textContent || '<span style="color:red">Non renseigné</span>';
+
+  const techniciteValeur = parseInt(document.getElementById("technicite")?.value) || 0;
+  const technicite = getLibelleTechnicite(techniciteValeur);
+  const risqueValeur = parseInt(document.getElementById("risque")?.value) || 0;
+  const risque = getLibelleRisque(risqueValeur);
+  const remarques = getValeurOuRouge("remarques");
+  const organisateur = document.getElementById("organisateur-label")?.textContent || '<span style="color:red">Non renseigné</span>';
+  const blocK = getValeurOuRouge("bloc");
+
+  let resumeMeteo = "🌤️ Météo prévue : <span style='color:red'>Non disponible</span>";
+let alerteVent = "";
+
+if (window.meteoJourRando) {
+  const m = window.meteoJourRando;
+
+  const ventTxt =
+  (m.vent !== null && m.vent !== undefined)
+    ? `💨 Vent ${m.vent} km/h${m.ventDir !== null && m.ventDir !== undefined
+        ? " (" + directionVent(m.ventDir) + ")"
+        : ""}`
+    : "💨 Vent N/D";
+
+
+  const rafalesTxt = (m.rafales !== null && m.rafales !== undefined)
+    ? `🌪 Rafales ${m.rafales} km/h`
+    : "";
+
+  resumeMeteo =
+    `🌤️ Météo prévue le ${formatDateFR(m.date)} (fournie à titre indicatif par open-meteo.com): ` +
+    `${m.label}, ☔ ${m.pluie}%` +
+    ` ● ${m.tmin}°C / ${m.tmax}°C ● ${ventTxt} ● ${rafalesTxt}`;
+
+  if (m.rafales >= 60) {
+    alerteVent = " ⚠️ ATTENTION : rafales fortes, vigilance randonnée !";
+  }
+}
+
+  /* =======================
+     3. CONSTRUCTION RÉSUMÉ
+     ======================= */
+
+  const resume = `
+Feuille de route : ${jour} ${dateFormatted} — ${nomRando}
+Nom de la randonnée : ${nomRando}
+📆 Date de la randonnée : ${dateFormatted}<br>${resumeMeteo}<br>${alerteVent}
+
+🅿️ Parking Covoiturage : ${lieuRV}
+🕞 Heure de rendez-vous : ${heureRV}
+🔔 Heure de Départ : ${heureDepart}
+
+Trajet suggéré: ${description}
+
+Kilométrage voiture A/R : ${trajetkm} km
+🏁 Parking de Départ de la randonnée : ${parkingDepart}
+${lastMapLink ? `📍 Lien Google Maps : ${lastMapLink}` : ""}
+${window.lastLat ? `<br>📌 Coordonnées GPS : ${window.lastLat}, ${window.lastLon}` : ""}<br>
+Coût du Trajet : ${totalTrajet} €
+Coût de l'Autoroute : ${coutAutoroute} €
+Coût Trajet Total : ${coutTotal} €
+✅ Covoiturage (par 4) : ${covoit4} €
+✅ Covoiturage (par 5) : ${covoit5} €
+
+Distance de la Randonnée : ≃${km} km
+😋 Dénivelé positif : ≃${denivele} m
+⏱️ Durée totale: ≃${duree}
+
+IBP : ${ibp} (HKG)
+E: ${effort}, T: ${techniciteValeur} (${technicite}), R : ${risqueValeur} (${risque})
+
+📌 Remarques et particularités : ${remarques}
+
+🚶‍♂️🚶🏻‍♀️Animateur-trice : ${organisateur}
+
+Les paramètres de la randonnée sont donnés à titre indicatif uniquement. 
+Ils peuvent varier en fonction des applications GPS.
+
+Inscription auprès de l'animateur-trice la veille avant 19h par SMS.
+L'animateur-trice se réserve le droit de modifier le circuit.
+
+ÉQUIPEMENT : Les chaussures de randonnée montantes et les bâtons de marche sont obligatoires. 
+Prévoir des vêtements de protection (vent, pluie, froid), un sac à dos avec pique-nique et de l'eau en quantité suffisante, ainsi que sa propre pharmacie.
+`.trim();
+
+  /* =======================
+     4. AFFICHAGE
+     ======================= */
+    const resultatDiv = document.getElementById("resultat");
+  if (!resultatDiv) {
+    alert("Erreur : conteneur du résumé introuvable");
+    return;
+  }
+
+  resultatDiv.innerHTML = resume.replace(/\n/g, "<br>");
+  resultatDiv.focus?.();
+}
+
+/* --- copies / envoi --- */
+function validerNumerique(id){
+  const champ=document.getElementById(id);
+  if(!champ) return;
+  const valeur = champ.value.trim();
+  const messageErreurId = id + "-erreur"; let messageErreur = document.getElementById(messageErreurId);
+  if(!messageErreur){ messageErreur = document.createElement("p"); messageErreur.id = messageErreurId; messageErreur.className = "message-erreur"; messageErreur.style.color="white"; messageErreur.style.backgroundColor="red"; messageErreur.style.padding="5px"; messageErreur.style.borderRadius="3px"; messageErreur.style.fontSize="0.9em"; messageErreur.style.marginTop="5px"; champ.parentNode.insertBefore(messageErreur, champ.nextSibling); }
+  if(valeur==="" || isNaN(valeur)){ messageErreur.textContent = "Valeurs numériques uniquement"; messageErreur.style.display = "block"; } else { messageErreur.style.display = "none"; }
+}
+
+
+function getCanvasBase64() {
+  const canvas = document.getElementById("elevationChart");
+  if (!canvas || canvas.width === 0 || canvas.height === 0) {
+    return null;
+  }
+  return canvas.toDataURL("image/png");
+}
+function getCanvasBase64WithFooter() {
+  const canvas = document.getElementById("elevationChart");
+  if (!canvas) return null;
+
+  const date = document.getElementById("date")?.value || "";
+  const dateFormatted = date
+    ? new Date(date).toLocaleDateString("fr-FR")
+    : "";
+
+  const rando = typeof getNomRando === "function"
+    ? getNomRando()
+    : "Randonnée";
+  const organisateur =
+  document.getElementById("organisateur")?.value?.trim() || "";
+  const footerText = `${rando} — ${dateFormatted} — ${organisateur}`;
+  const footerHeight = 50;
+
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height + footerHeight;
+
+  const ctx = exportCanvas.getContext("2d");
+
+  // fond blanc
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+  // courbe
+  ctx.drawImage(canvas, 0, 0);
+
+  // texte
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+
+  ctx.fillText(
+    footerText,
+    exportCanvas.width / 2,
+    canvas.height + 32
+  );
+
+  return exportCanvas.toDataURL("image/png");
+}
+  // 🔒 Protection contre les envois multiples
+let envoiEnCours = false;
+
+/**
+ * Vérifie la validité de l'email utilisateur
+ * - champ optionnel
+ * - utilise la validation HTML5 (type="email")
+ */
+function verifierEmail() {
+  const input = document.getElementById("emailUtilisateur");
+  const erreur = document.getElementById("emailErreur");
+
+  // champ absent ou vide → OK (email optionnel)
+  if (!input || input.value.trim() === "") {
+    if (erreur) erreur.style.display = "none";
+    return true;
+  }
+
+  // validation HTML5 native
+  if (!input.checkValidity()) {
+    if (erreur) erreur.style.display = "block";
+    return false;
+  }
+
+  if (erreur) erreur.style.display = "none";
+  return true;
+}
+function verifierChampsAvantEnvoi() {
+  const champsSet = new Set();
+
+  // --- Infos générales ---
+  if (estVide(getNomRando())) champsSet.add("Nom de la randonnée");
+  if (!document.getElementById("date")?.value)
+    champsSet.add("Date de la randonnée");
+
+  const jour = document.getElementById("jour-semaine")?.textContent?.trim();
+  if (!jour) champsSet.add("Jour de la randonnée");
+
+  // --- Horaires ---
+  const heureRV = document.getElementById("heure-rv")?.value || "";
+  if (estVide(heureRV)) champsSet.add("Heure de rendez-vous");
+
+  const heureDepart = document.getElementById("heure-depart")?.textContent?.trim() || "";
+  if (!heureDepart) champsSet.add("Heure de départ");
+
+  const parkingDepart = document.getElementById("parking-depart")?.value || "";
+  if (estVide(parkingDepart))
+    champsSet.add("Parking de départ de la randonnée");
+
+    // --- GPX ---
+  const inputGPX = document.getElementById("file");
+  if (!inputGPX || inputGPX.files.length === 0) {
+    champsSet.add("Fichier GPX non importé");
+
+  // --- Trajet & rando ---
+  const km = document.getElementById("km")?.value || "";
+  if (estVide(km)) champsSet.add("Distance de la randonnée");
+
+  const denivele = document.getElementById("denivele")?.value || "";
+  if (estVide(denivele)) champsSet.add("Dénivelé");
+
+  const duree = document.getElementById("duree")?.value || "";
+  if (estVide(duree)) champsSet.add("Durée totale (hh:mm)");
+
+    // --- Cotation ---
+  const ibp = document.getElementById("ibp")?.value || "";
+  if (estVide(ibp)) champsSet.add("IBP (Effort)");
+
+  const technicite = document.getElementById("technicite")?.value || "";
+  if (estVide(technicite) || technicite === "0")
+    champsSet.add("Technicité");
+
+  const risque = document.getElementById("risque")?.value || "";
+  if (estVide(risque) || risque === "0")
+    champsSet.add("Risque");
+
+
+  }
+
+  // --- Organisateur ---
+  const organisateur = document.getElementById("organisateur")?.value || "";
+  if (estVide(organisateur))
+    champsSet.add("Nom de l’organisateur");
+
+
+
+  // --- Résultat ---
+  const champsManquants = [...champsSet];
+
+  if (champsManquants.length > 0) {
+    afficherPopupChampsManquants(champsManquants);
+    return false;
+  }
+
+  return true;
+}
+
+
+async function envoyerEmail() {
+  const emailUtilisateur =
+  document.getElementById("emailUtilisateur")?.value || "";
+  // ✅ ICI : validation email (AVANT tout envoi)
+  if (!verifierEmail()) {
+    alert("Veuillez saisir une adresse email valide.");
+    return;
+  }
+  const date = document.getElementById("date").value || "";
+  const dateFormatted = date
+    ? new Date(date).toLocaleDateString("fr-FR")
+    : "";
+
+  const jour = document.getElementById("jour-semaine").textContent || "";
+  const lieu = getNomRando() || "Non renseigné";
+  const resume = document.getElementById("resultat").innerText || "";
+
+  const sujet = `${jour} ${dateFormatted} ${lieu}`;
+
+  const corpsMail =
+    "Bonjour La Marmotte,\n\n" +
+    "Voici ma feuille de route.\n\n" +
+    resume +
+    "\n\nCordialement.";
+
+  const image = getCanvasBase64WithFooter();
+if (!image) {
+  alert("La courbe n’est pas encore prête. Générez le profil avant l’envoi.");
+  return;
+}
+
+  await fetch("/api/send-mail", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    subject: sujet,
+    message: corpsMail,
+    imageBase64: image,
+    emailUtilisateur: document.getElementById("emailUtilisateur")?.value || ""
+  })
+});
+
+  alert("Mail envoyé avec la courbe en pièce jointe ✅");
+}
+/* =========================
+   POPUP CHAMPS MANQUANTS
+   ========================= */
+
+function afficherPopupChampsManquants(champs) {
+    if (!Array.isArray(champs) || champs.length === 0) return;
+  const popup = document.getElementById("popup-missing");
+  const list = document.getElementById("missing-list");
+
+  if (!popup || !list) return;
+
+  list.innerHTML = "";
+
+  champs.forEach(champ => {
+    const li = document.createElement("li");
+    li.textContent = champ;
+    list.appendChild(li);
+  });
+
+  document.body.style.overflow = "hidden";
+  popup.style.display = "flex";
+}
+
+function fermerPopupMissing() {
+  const popup = document.getElementById("popup-missing");
+  if (popup) popup.style.display = "none";
+  document.body.style.overflow = "";
+}
+
+</script>
+
+<script>
+// === Leaflet & Nominatim integration (replaces previous updateParkingMap / mettreAJourDistance) ===
+
+// --- variables globales ---
+  // --- Mise à jour automatique du point de départ (parking covoiturage) ---
+let lastMapLink = "";
+window.lastLat = null;
+window.lastLon = null;
+window.leafletMap = null;
+window.leafletMarker = null;
+window.routeLayer = null;
+
+// HOME_LAT / HOME_LON can be updated dynamically from the parking covoiturage select
+let HOME_LAT = 43.88808;
+let HOME_LON = 4.84882;
+
+// --- Mise à jour automatique du point de départ (parking covoiturage) ---
+async function setHomeFromParking() {
+    const select = document.getElementById("lieu");
+    const autre = document.getElementById("autreLieu");
+
+    if (!select) return;
+
+    let texte = "";
+    if (select.value === "autre") {
+        if (!autre || !autre.value.trim()) return;
+        texte = autre.value.trim();
+    } else {
+        texte = select.value;
+    }
+    if (!texte) return;
+
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texte)}`;
+        const r = await fetch(url, { headers: { "Accept-Language": "fr" } });
+        const j = await r.json();
+        if (!j || !j.length) {
+            console.warn("Parking covoiturage introuvable :", texte);
+            return;
+        }
+        HOME_LAT = parseFloat(j[0].lat);
+        HOME_LON = parseFloat(j[0].lon);
+        console.log("NOUVEAU point de départ COVOIT =", HOME_LAT, HOME_LON);
+        if (window.lastLat && window.lastLon) {
+            updatePosition(window.lastLat, window.lastLon);
+        }
+    } catch (e) {
+        console.error("Erreur en géocodant le parking covoiturage :", e);
+    }
+}
+
+function calculerCouts(){
+  const km = parseFloat(document.getElementById('trajet-km').value) || 0;
+  const autoroute = parseFloat(document.getElementById('cout-autoroute').value) || 0;
+  const totalTrajet = km * 0.3;
+  const coutTotal = totalTrajet + autoroute;
+  const elTotal = document.getElementById('total-trajet');
+  const elCout = document.getElementById('cout-total');
+  const el4 = document.getElementById('covoit4');
+  const el5 = document.getElementById('covoit5');
+  if(elTotal) elTotal.textContent = totalTrajet.toFixed(2);
+  if(elCout) elCout.textContent = coutTotal.toFixed(2);
+if(el4) el4.textContent = (Math.round((coutTotal/4) * 10) / 10).toFixed(1);
+if(el5) el5.textContent = (Math.round((coutTotal/5) * 10) / 10).toFixed(1);
+}
+
+async function getDrivingRoute(lat1, lon1, lat2, lon2){
+  const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+  try{
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('OSRM error ' + r.status);
+    const j = await r.json();
+    if(j.routes && j.routes.length > 0){
+      return {
+        distance_km: j.routes[0].distance / 1000,
+        coords: j.routes[0].geometry.coordinates.map(c => [c[1], c[0]])
+      };
+    }
+  }catch(e){ console.warn('getDrivingRoute error', e); }
+  return null;
+}
+
+function drawRoute(coords){
+  if(!window.leafletMap) return;
+
+  if(window.routeLayer){
+    try{
+      window.leafletMap.removeLayer(window.routeLayer);
+    }catch(e){}
+    window.routeLayer = null;
+  }
+
+  if(coords && coords.length){
+    window.routeLayer = L.polyline(coords, {
+      color:'#0074D9',
+      weight:4,
+      opacity:0.9
+    }).addTo(window.leafletMap);
+
+    // ✅ Le bouton apparaît quand une route existe
+    setRecenterButtonVisible(true);
+
+  } else {
+    setRecenterButtonVisible(false);
+  }
+}
+
+
+function updatePosition(lat, lon){
+  window.lastLat = lat;
+  window.lastLon = lon;
+  lastMapLink = `https://www.google.com/maps?q=${lat},${lon}`;
+  const captionEl = document.getElementById('parkingMapCaption');
+  if(captionEl) captionEl.innerHTML = `<strong>GPS :</strong> ${lat.toFixed(6)}, ${lon.toFixed(6)} — <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener">Ouvrir dans Google Maps</a>`;
+
+  getDrivingRoute(HOME_LAT, HOME_LON, lat, lon).then(res =>{
+    if(res){
+      const kmAR = (res.distance_km * 2).toFixed(1);
+      const el = document.getElementById("trajet-km");
+      if(el) el.value = kmAR;
+      drawRoute(res.coords);
+    } else {
+      // fallback: haversine
+      const R = 6371;
+      const dLat = (lat - HOME_LAT) * Math.PI/180;
+      const dLon = (lon - HOME_LON) * Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(HOME_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
+      const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const el = document.getElementById("trajet-km");
+      if(el) el.value = (d*2).toFixed(1);
+      try{ if(window.routeLayer){ window.leafletMap.removeLayer(window.routeLayer); window.routeLayer = null; } }catch(e){}
+    }
+    calculerCouts();
+  });
+}
+
+function updateParkingMap(){
+  const query = document.getElementById('parking-depart').value.trim();
+  if(query.length < 3) return;
+
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+    .then(r => r.json())
+    .then(results => {
+      if(!results || !results.length){
+        console.warn("Nominatim : aucun résultat");
+        return;
+      }
+
+      const lat = parseFloat(results[0].lat);
+      const lon = parseFloat(results[0].lon);
+
+      /* ===== METEO ===== */
+      updateOpenMeteo(lat, lon);
+
+      /* ===== CARTE ===== */
+      const mapDiv = document.getElementById('parkingMap');
+      if(mapDiv){
+        mapDiv.style.display = 'block';
+        mapDiv.style.width = '100%';
+        mapDiv.style.height = '400px';
+      }
+
+      if(!window.leafletMap){
+        window.leafletMap = L.map('parkingMap').setView([lat, lon], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+          maxZoom:19,
+          attribution:'&copy; OpenStreetMap contributors'
+        }).addTo(window.leafletMap);
+      } else {
+        window.leafletMap.setView([lat, lon], 13);
+      }
+
+      /* ===== MARKER ===== */
+      if(!window.leafletMarker){
+        window.leafletMarker = L.marker([lat, lon], {draggable:true}).addTo(window.leafletMap);
+        window.leafletMarker.on('dragend', e =>{
+          const p = e.target.getLatLng();
+
+          // 🔁 TRACÉ + KM + METEO
+          updatePosition(p.lat, p.lng);
+          updateOpenMeteo(p.lat, p.lng);
+        });
+      } else {
+        window.leafletMarker.setLatLng([lat, lon]);
+      }
+
+      /* ===== 🔥 TRACÉ A/R + DISTANCE 🔥 ===== */
+      updatePosition(lat, lon);
+
+    })
+    .catch(err => {
+      console.error("Nominatim error:", err);
+    });
+}
+
+// ✅ Recentrage manuel du trajet (bouton)
+function recenterRoute(){
+  if(window.leafletMap && window.routeLayer){
+    try{
+      window.leafletMap.fitBounds(window.routeLayer.getBounds(), {padding:[40,40]});
+    }catch(e){
+      console.error("Erreur recentrage :", e);
+      alert("Impossible de recentrer le trajet.");
+    }
+  } else {
+    alert("Aucun trajet à afficher.");
+  }
+}
+
+// ✅ Affichage du bouton uniquement quand une route existe
+function setRecenterButtonVisible(visible){
+  const btn = document.getElementById("btn-recentrer-trajet");
+  if(!btn) return;
+  btn.style.display = visible ? "inline-block" : "none";
+}
+function weatherLabel(code){
+  if(code === 0) return "☀️ Soleil";
+  if([1,2].includes(code)) return "🌤️ Peu nuageux";
+  if(code === 3) return "☁️ Couvert";
+  if([45,48].includes(code)) return "🌫️ Brouillard";
+  if([51,53,55,61,63,65].includes(code)) return "🌧️ Pluie";
+  if([71,73,75].includes(code)) return "❄️ Neige";
+  if(code >= 95) return "⛈️ Orage";
+  return "🌥️ Variable";
+}
+      function directionVent(deg) {
+  if (deg === null || deg === undefined) return "N/D";
+  const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE",
+                "S","SSO","SO","OSO","O","ONO","NO","NNO"];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+function formatDateFR(dateStr){
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("fr-FR");
+}
+
+function updateOpenMeteo(lat, lon){
+  window.meteoJourRando = null;
+
+  const url =
+  "https://api.open-meteo.com/v1/forecast" +
+  `?latitude=${lat}&longitude=${lon}` +
+  "&daily=temperature_2m_max,temperature_2m_min," +
+  "precipitation_probability_max,weathercode," +
+  "windspeed_10m_max,winddirection_10m_dominant,windgusts_10m_max" +
+  "&forecast_days=7" +
+  "&timezone=Europe/Paris";
+
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+  if (!data || !data.daily || !Array.isArray(data.daily.time)) {
+  console.error("Réponse Open-Meteo invalide :", data);
+  return;
+}
+      const bloc = document.getElementById("meteo-openmeteo");
+      if(!bloc) return;
+
+      bloc.style.display = "block";
+
+      let html = "<ul>";
+      const dateRando = getDateRando();
+
+      window.meteoJourRando = null;
+
+
+      data.daily.time.forEach((day, i) => {
+
+        const dayNorm = normalizeDate(day);
+        const isRandoDay = dateRando && dayNorm === dateRando;
+        const cls = isRandoDay ? "meteo-rando-day" : "";
+
+        // valeurs sécurisées
+        const tmin = data.daily.temperature_2m_min?.[i];
+        const tmax = data.daily.temperature_2m_max?.[i];
+        const pluie = data.daily.precipitation_probability_max?.[i];
+        const vent = data.daily.windspeed_10m_max?.[i];
+        const rafales = data.daily.windgusts_10m_max?.[i];
+        const label = weatherLabel(data.daily.weathercode?.[i]);
+        const ventDir = data.daily.winddirection_10m_dominant?.[i] ?? null;
+
+        // sauvegarde jour de rando
+        if(isRandoDay){
+          window.meteoJourRando = {
+            date: day,
+            label,
+            tmin,
+            tmax,
+            pluie,
+            vent,
+            rafales,
+            ventDir   // 👈 AJOUTER
+          };
+        }
+
+        html += `
+          <li class="${cls}">
+            <b>${formatDateFR(day)}</b> ● ${label}
+            ● ☔ ${pluie ?? "—"} %
+            ● ${tmin ?? "—"}°C / ${tmax ?? "—"}°C
+            ● 💨 ${vent ?? "—"} km/h${ventDir !== null ? ` (${directionVent(ventDir)})` : ""}
+            ● 🌪 ${rafales ?? "—"} km/h
+          </li>`;
+      });
+
+      html += "</ul>";
+      bloc.innerHTML = html;
+    })
+    .catch(err => {
+      console.error("Erreur Open-Meteo", err);
+    });
+}
+// === Saisie assistée Parking départ randonnée ===
+const parkingInput = document.getElementById("parking-depart");
+const datalist = document.getElementById("parkings-list");
+
+let timeoutParking = null;
+
+parkingInput.addEventListener("input", () => {
+  const query = parkingInput.value.trim();
+
+  // On évite les requêtes inutiles saisie 6 lettres
+  if (query.length < 4 ) return;
+
+  clearTimeout(timeoutParking);
+
+  timeoutParking = setTimeout(() => {
+    fetch(
+      `https://nominatim.openstreetmap.org/search?` +
+        `format=json` +
+        `&q=parking ${encodeURIComponent(query)}` +
+        `&limit=5` +
+        `&countrycodes=fr`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        datalist.innerHTML = "";
+
+        data.forEach((place) => {
+          const option = document.createElement("option");
+          option.value = place.display_name;
+          datalist.appendChild(option);
+        });
+      })
+      .catch((err) => {
+        console.error("Erreur saisie assistée parking", err);
+      });
+  }, 400); // délai anti-spam
+});
+
+</script>
+
+<script>
+function secondesVersHHMM(sec) {
+  const secondes = Number(sec);
+  if (!Number.isFinite(secondes) || secondes <= 0) return "";
+  const h = Math.floor(secondes / 3600);
+  const m = Math.floor((secondes % 3600) / 60);
+  return `${h}:${String(m).padStart(2, "0")}`;
+}
+
+function hhmmssVersHHMM(str) {
+  if (!str || typeof str !== "string") return "";
+  const parts = str.split(":");
+  if (parts.length < 2) return "";
+  return parts[0].padStart(2, "0") + ":" + parts[1].padStart(2, "0");
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let elevationChartInstance = null;
+</script>
+
+
+<!-- === IBPindex GPX API === -->
+<script>
+
+  function hhmmssVersHHMM(str) {
+  if (!str || typeof str !== "string") return "";
+  const parts = str.split(":");
+  if (parts.length < 2) return "";
+  return parts[0].padStart(2, "0") + ":" + parts[1].padStart(2, "0");
+}
+
+  function exploiterIBP(javascript_json){
+
+  let modality = javascript_json.detectedmodality;
+
+  // Cas IBP : modalité non détectée automatiquement
+  if (modality === "manually" || !javascript_json[modality]) {
+
+    if (javascript_json.hiking) {
+      modality = "hiking";
+    } else if (javascript_json.trekking) {
+      modality = "trekking";
+    } else {
+      console.warn("Aucune modalité randonnée disponible", javascript_json);
+      return;
+    }
+  }
+
+  const data = javascript_json[modality];
+
+
+  if(data.totlengthkm){
+    km.value = Number(data.totlengthkm).toFixed(1);
+    ajusterLargeur(km);
+  }
+
+  if(data.accuclimb){
+    denivele.value = Math.round(data.accuclimb);
+    ajusterLargeur(denivele);
+  }
+
+ // === Durée totale (IBP + fallback GPX) ===
+let duree = "";
+
+// ✅ IBP en priorité (hh:mm:ss)
+if (typeof data.totaltime === "string") {
+  duree = hhmmssVersHHMM(data.totaltime);
+} else if (typeof data.movingtime === "string") {
+  duree = hhmmssVersHHMM(data.movingtime);
+}
+
+
+if (duree) {
+  const champDuree = document.getElementById("duree");
+  champDuree.value = duree;
+  ajusterLargeur(champDuree);
+} else {
+  console.warn("Durée introuvable (IBP + GPX)", data);
+}
+console.log("Durée IBP reçue :", data.totaltime);
+
+
+
+  if(data.ibp){
+    ibp.value = Math.round(data.ibp);
+    afficherIBP();
+  }
+}
+
+$(function(){
+
+  $("#formuploadajax").on("submit", function(e){
+    e.preventDefault();
+
+    $("#gpx-status").text("⏳ Analyse du fichier GPX en cours...");
+
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: "https://ibp-proxy.vercel.app/api/ibp",
+      type: "POST",
+      dataType: "json",
+      data: formData,
+      contentType: false,
+      processData: false
+    })
+    .done(function(data){
+  console.log("Réponse IBP brute :", data);
+
+  exploiterIBP(data);
+
+  window.gpxImporte = true; // ✅ GPX bien analysé
+
+  $("#gpx-status").text("✅ GPX analysé avec succès");
+})
+
+
+    .fail(err=>{
+      console.error("Erreur IBPindex:", err);
+      $("#gpx-status").text("❌ Erreur IBPindex");
+    });
+
+  });
+
+});
+</script>
+<script>
+// let elevationChartInstance = null;
+
+document.getElementById("formuploadajax").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const fileInput = document.getElementById("file");
+  if (!fileInput.files.length) return;
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    const gpxText = event.target.result;
+    parseGPXandDrawProfile(gpxText);
+  };
+
+  reader.readAsText(file);
+});
+</script>
+<script>
+const whiteBackgroundPlugin = {
+  id: 'whiteBackground',
+  beforeDraw(chart) {
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, chart.width, chart.height);
+    ctx.restore();
+  }
+};
+</script>
+<script>
+const verticalCursorPlugin = {
+  id: 'verticalCursor',
+  afterDraw(chart) {
+    const tooltip = chart.tooltip;
+    if (!tooltip || !tooltip.getActiveElements().length) return;
+
+    const ctx = chart.ctx;
+    const chartArea = chart.chartArea;
+    const activePoint = tooltip.getActiveElements()[0];
+    const x = activePoint.element.x;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x, chartArea.top);
+    ctx.lineTo(x, chartArea.bottom);
+
+    /* 🎨 OPTIONS ESTHÉTIQUES ICI */
+    ctx.lineWidth = 2;                     // épaisseur
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';  // couleur
+    ctx.setLineDash([6, 4]);               // pointillé
+    // ctx.setLineDash([]);                // ← ligne pleine (alternative)
+
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+</script>
+
+
+<script>
+// 🔸 Fonction couleur pente (à coller UNE SEULE FOIS)
+function couleurPente(pente, maxSlopeIBP) {
+
+  const ref = maxSlopeIBP && maxSlopeIBP > 0 ? maxSlopeIBP : 30;
+  const t = Math.min(Math.abs(pente) / ref, 1);
+
+  if (pente < 0) {
+    // 🔵 DESCENTE : bleu clair → bleu foncé
+    const b = 255;
+    const g = Math.round(200 * (1 - t));
+    return `rgb(0,${g},${b})`;
+  } else {
+    // 🟠→🔴 MONTÉE : orange → rouge
+    const r = 255;
+    const g = Math.round(165 * (1 - t));
+    return `rgb(${r},${g},0)`;
+  }
+}
+
+function penteLissée(index, elevations, distances, windowSize = 5) {
+  if (index < windowSize) return 0;
+
+  const dz = elevations[index] - elevations[index - windowSize];
+  const dd = (distances[index] - distances[index - windowSize]) * 1000; // km → m
+
+  return dd > 0 ? (dz / dd) * 100 : 0;
+}
+
+  // 🔸 Fonction principale GPX 
+function parseGPXandDrawProfile(gpxText, maxSlopeIBP) {
+
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(gpxText, "application/xml");
+  const trackPoints = xml.getElementsByTagName("trkpt");
+
+  const elevations = [];
+  const distances = [];
+  const segmentColors = [];
+  const segmentPentes = [];
+
+  let totalDistance = 0;
+  let lastLat = null;
+  let lastLon = null;
+
+  for (let i = 0; i < trackPoints.length; i++) {
+    const pt = trackPoints[i];
+    const lat = parseFloat(pt.getAttribute("lat"));
+    const lon = parseFloat(pt.getAttribute("lon"));
+    const eleNode = pt.getElementsByTagName("ele")[0];
+    if (!eleNode) continue;
+
+    const ele = parseFloat(eleNode.textContent);
+
+    if (lastLat !== null) {
+      const dist = haversine(lastLat, lastLon, lat, lon) * 1000; // m
+      totalDistance += dist;
+    }
+
+    elevations.push(ele);
+    distances.push(totalDistance / 1000); // km NUMÉRIQUE
+
+    // 🔥 calcul pente lissée APRES insertion
+    const index = elevations.length - 1;
+    const pente = penteLissée(index, elevations, distances);
+    segmentPentes.push(pente);
+
+    if (index > 0) {
+      segmentColors.push(couleurPente(pente, maxSlopeIBP));
+    }
+
+    lastLat = lat;
+    lastLon = lon;
+  }
+
+  drawElevationChart(distances, elevations, segmentColors, segmentPentes);
+}
+// 🔸 haversine
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const toRad = deg => deg * Math.PI / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+</script>
+<script>
+function minutesToHHMM(totalMinutes){
+  const h = Math.floor(totalMinutes / 60);
+  const m = Math.round(totalMinutes % 60);
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+</script>
+
+<script>
+/* ===== OUTILS DUREE ===== */
+
+function formatDuree(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h > 0 ? `${h} h ${m} min` : `${m} min`;
+}
+
+function updateDureeDeplacement(distanceTotaleKm) {
+  const champ = document.getElementById("duree-deplacement");
+  const vitesse = parseFloat(document.getElementById("vitesse")?.value);
+
+  if (!champ || !vitesse || distanceTotaleKm <= 0) {
+    if (champ) champ.value = "—";
+    return;
+  }
+
+  const minutes = (distanceTotaleKm / vitesse) * 60;
+  champ.value = formatDuree(minutes);
+}
+
+/* ===== LISTENER (AU BON MOMENT) ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("vitesse")?.addEventListener("input", () => {
+    if (window.lastDistanceTotale) {
+      updateDureeDeplacement(window.lastDistanceTotale);
+    }
+  });
+});
+</script>
+<script>
+function getStepDistance(totalKm) {
+  if (totalKm <= 5) return 0.5;
+  if (totalKm <= 15) return 1;
+  return 2;
+}
+</script>
+<script>
+function drawElevationChart(distances, elevations, segmentColors, segmentPentes) {
+
+  const canvas = document.getElementById("elevationChart");
+  const ctx = canvas.getContext("2d");
+
+  const totalKm = distances[distances.length - 1];
+  const stepX = getStepDistance(totalKm);
+
+  if (elevationChartInstance) elevationChartInstance.destroy();
+
+  elevationChartInstance = new Chart(ctx, {
+    type: "line",
+
+    data: {
+  datasets: [{
+    data: distances.map((d, i) => ({
+      x: d,
+      y: elevations[i]
+    })),
+    borderWidth: 3,
+    pointRadius: 0,
+    fill: false,
+    tension: 0.25,
+    segment: {
+      borderColor: c =>
+        segmentColors[c.p0DataIndex] || '#888'
+    }
+  }]
+},
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      interaction: {
+        mode: 'nearest',
+        intersect: false
+      },
+
+      plugins: {
+        legend: { display: false },
+
+        tooltip: {
+  callbacks: {
+    label: context => {
+
+      const i = context.dataIndex;
+      const distanceKm = context.parsed.x;
+      const altitude = Math.round(context.parsed.y);
+      const pente = segmentPentes[i] ?? 0;
+
+      const vitesse =
+        parseFloat(document.getElementById("vitesse")?.value);
+
+      const heureDepart =
+        document.getElementById("heure-depart-rando")?.value;
+
+      let horaireTxt = "Horaire : —";
+
+      if (vitesse > 0 && heureDepart) {
+        const [h, m] = heureDepart.split(":").map(Number);
+        const departMinutes = h * 60 + m;
+        const dureeMinutes = (distanceKm / vitesse) * 60;
+        horaireTxt =
+          "Horaire : " +
+          minutesToHHMM(departMinutes + dureeMinutes);
+      }
+
+      return [
+        `Distance : ${distanceKm.toFixed(2)} km`,
+        `Altitude : ${altitude} m`,
+        `Pente : ${pente.toFixed(1)} %`,
+        horaireTxt
+      ];
+    }
+  }
+}
+},
+
+      scales: {
+  x: {
+    type: 'linear',
+    min: 0,
+    max: totalKm,
+
+    title: {
+      display: true,
+      text: "Distance (km)"
+    },
+
+    ticks: {
+      stepSize: stepX,
+      callback: v => {
+        const n = Number(v);
+        return Number.isInteger(n) ? n.toString().replace('.', ',') : '';
+      }
+    },
+
+    grid: {
+      color: ctx =>
+        ctx.tick.value % 1 === 0 ? '#999' : '#ddd'
+    }
+  },
+
+  y: {
+    title: {
+      display: true,
+      text: "Altitude (m)"
+        }
+      }
+    }
+  },
+
+    plugins: [
+      whiteBackgroundPlugin,
+      verticalCursorPlugin
+    ]
+  });
+
+  /* ===== FIN drawElevationChart ===== */
+  window.lastDistanceTotale = totalKm;
+  updateDureeDeplacement(totalKm);
+}
+</script>
+
+
+
+<!-- === FIN IBPindex GPX API & noms auto du jpg exporté === -->
+
+<script>
+document.getElementById("exportProfilJPG").addEventListener("click", function () {
+
+  if (!elevationChartInstance) {
+    alert("Profil non généré");
+    return;
+  }
+
+  /* ===== récupération date ===== */
+  const dateInput = document.getElementById("date")?.value;
+  const dateFormatted = dateInput
+    ? new Date(dateInput).toLocaleDateString("fr-FR")
+    : "Date non renseignée";
+
+  /* ===== récupération nom rando ===== */
+  const nomRando =
+    document.getElementById("nom")?.value === "autre"
+      ? document.getElementById("autreNomRando")?.value
+      : document.getElementById("nom")?.value ||
+        document.getElementById("rechercheRando")?.value ||
+        "Randonnée";
+
+  const titre = `${dateFormatted} — ${nomRando}`;
+
+  /* ===== canvas source ===== */
+  const sourceCanvas = document.getElementById("elevationChart");
+
+  /* ===== canvas export (plus haut) ===== */
+  const exportCanvas = document.createElement("canvas");
+  const margeBas = 40; // espace pour le titre
+
+  exportCanvas.width = sourceCanvas.width;
+  exportCanvas.height = sourceCanvas.height + margeBas;
+
+  const ctx = exportCanvas.getContext("2d");
+
+  /* fond blanc */
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+  /* copier le graphique */
+  ctx.drawImage(sourceCanvas, 0, 0);
+
+  /* écrire le titre */
+  ctx.font = "bold 14px Arial";
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    titre,
+    exportCanvas.width / 2,
+    sourceCanvas.height + 26
+  );
+
+  /* ===== export ===== */
+  const nomFichier = `${dateFormatted}_${nomRando}`
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .replace(/_+/g, "_") + ".jpg";
+
+  const jpg = exportCanvas.toDataURL("image/jpeg", 0.95);
+
+  const a = document.createElement("a");
+  a.href = jpg;
+  a.download = nomFichier;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
+</script>
+
+
+
+<script>
+window.addEventListener("resize", () => {
+  if (elevationChartInstance) {
+        elevationChartInstance.update();
+  }
+});
+</script>
+
+<!-- POPUP CHAMPS MANQUANTS (MOBILE FRIENDLY) -->
+<div id="popup-missing" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+">
+
+  <div style="
+    background:#de1062;
+    color:#000;
+    padding:18px 16px;
+    border-radius:16px;
+    width:92%;
+    max-width:420px;
+    max-height:85vh;
+    overflow-y:auto;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  ">
+
+    <h4 style="margin-top:0;text-align:center;font-size:1.1rem;">
+      ⚠️ POUR INFO<br>
+      Les champs suivants ne sont pas renseignés
+    </h4>
+
+    <ul id="missing-list" style="
+      text-align:left;
+      padding-left:18px;
+      margin:12px 0;
+      font-size:0.95rem;
+    "></ul>
+
+    <h4 style="text-align:center;font-size:1rem;margin:10px 0 14px;">
+      Remplissez les champs manquants<br>
+      puis poursuivez votre FdR
+    </h4>
+
+    <button onclick="fermerPopupMissing()" style="
+      width:100%;
+      padding:12px;
+      font-size:1rem;
+      font-weight:bold;
+      border-radius:12px;
+      border:none;
+      background:#1a73e8;
+      color:white;
+    ">
+      J’ai compris
+    </button>
+
+  </div>
+</div>
+
+
+
+
+</body>
+</html>
