@@ -7,7 +7,7 @@
 
 
 <style>
-  /* === index copie du 19/1/26 === */
+  /* === index_manquants_03/02/26 === */
 body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background-color: #f4f9f9;
@@ -812,6 +812,10 @@ label, input{
 
 <!-- Script unique et ordonné -->
 <script>
+  let gpxImporte = false;
+  window.gpxImporte = false;
+
+
   window.meteoJourRando = null;
 
   function getDateRando(){
@@ -951,6 +955,19 @@ function getLibelleTechnicite(valeur){ const niveaux=["Facile","Assez Facile","P
 function getLibelleRisque(valeur){ const niveaux=["Faible","Assez Faible","Peu Élevé","Assez Élevé","😅 Élevé"]; return niveaux[valorToIndex(valeur)] || "Non renseigné"; }
 function valorToIndex(v){ return (typeof v==='number' && v>=1 && v<=5) ? v-1 : -1; }
 
+/* --- champs manquants --- */
+function estVide(valeur) {
+  return (
+    valeur === null ||
+    valeur === undefined ||
+    valeur === "" ||
+    valeur === 0 ||
+    valeur === "0" ||
+    valeur.toString().includes("Non renseigné")
+  );
+}
+
+
 /* --- fonction principale : génère le texte -> sécurisée --- */
 function genererTexte(){
   const nomRando = getNomRando() || '<span style="color:red">Non renseigné</span>';
@@ -988,15 +1005,20 @@ function genererTexte(){
   const remarques = getValeurOuRouge("remarques");
   const organisateur = document.getElementById("organisateur-label")?.textContent || '<span style="color:red">Non renseigné</span>';
   const blocK = getValeurOuRouge("bloc");
+
   let resumeMeteo = "🌤️ Météo prévue : <span style='color:red'>Non disponible</span>";
 let alerteVent = "";
 
 if (window.meteoJourRando) {
   const m = window.meteoJourRando;
 
-  const ventTxt = (m.vent !== null && m.vent !== undefined)
-    ? `💨 Vent ${m.vent} km/h`
+  const ventTxt =
+  (m.vent !== null && m.vent !== undefined)
+    ? `💨 Vent ${m.vent} km/h${m.ventDir !== null && m.ventDir !== undefined
+        ? " (" + directionVent(m.ventDir) + ")"
+        : ""}`
     : "💨 Vent N/D";
+
 
   const rafalesTxt = (m.rafales !== null && m.rafales !== undefined)
     ? `🌪 Rafales ${m.rafales} km/h`
@@ -1004,14 +1026,82 @@ if (window.meteoJourRando) {
 
   resumeMeteo =
     `🌤️ Météo prévue le ${formatDateFR(m.date)} (fournie à titre indicatif par open-meteo.com): ` +
-    `${m.label}, ${m.tmin}°C / ${m.tmax}°C, ` +
-    `☔ ${m.pluie}% ● ${ventTxt} ● ${rafalesTxt}`;
+    `${m.label}, ☔ ${m.pluie}%` +
+    ` ● ${m.tmin}°C / ${m.tmax}°C ● ${ventTxt} ● ${rafalesTxt}`;
 
   if (m.rafales >= 60) {
     alerteVent = " ⚠️ ATTENTION : rafales fortes, vigilance randonnée !";
   }
 }
 
+  // ✅ résumé TOUJOURS généré
+//   genererTexte();
+// }
+
+
+
+
+// =======================
+// CHAMPS MANQUANTS (SANS DOUBLON)
+// =======================
+const champsSet = new Set();
+
+// Identité rando
+if (estVide(nomRando)) champsSet.add("Nom de la randonnée");
+if (!dateVal) champsSet.add("Date de la randonnée");
+if (estVide(jour)) champsSet.add("Jour de la randonnée");
+
+// Rendez-vous
+if (estVide(lieuRV)) champsSet.add("Parking de covoiturage");
+if (estVide(heureRV)) champsSet.add("Heure de rendez-vous");
+if (estVide(heureDepart)) champsSet.add("Heure de départ");
+
+// Trajet
+if (estVide(description)) champsSet.add("Description du trajet");
+if (estVide(trajetkm)) champsSet.add("Kilométrage voiture");
+if (estVide(parkingDepart)) champsSet.add("Parking départ randonnée");
+
+// Coûts
+if (estVide(totalTrajet)) champsSet.add("Coût du trajet");
+if (estVide(coutTotal)) champsSet.add("Coût total");
+if (estVide(covoit4)) champsSet.add("Covoiturage (4 pers)");
+if (estVide(covoit5)) champsSet.add("Covoiturage (5 pers)");
+
+// Randonnée
+if (estVide(km)) champsSet.add("Distance de la randonnée");
+if (estVide(denivele)) champsSet.add("Dénivelé");
+if (estVide(duree)) champsSet.add("Durée");
+
+// Difficulté
+if (estVide(ibp)) champsSet.add("IBP");
+if (estVide(effort)) champsSet.add("Effort");
+if (techniciteValeur === 0) champsSet.add("Technicité");
+if (risqueValeur === 0) champsSet.add("Risque");
+
+// Organisation
+if (estVide(organisateur)) champsSet.add("Animateur-trice");
+
+// Infos utiles
+if (estVide(remarques)) champsSet.add("Remarques / particularités");
+
+// GPX (UNE SEULE FOIS)
+const inputGPX = document.getElementById("file");
+if (!inputGPX || !inputGPX.files || inputGPX.files.length === 0) {
+  champsSet.add("Fichier GPX non importé");
+}
+
+// =======================
+// AFFICHAGE POPUP (INFORMATIF)
+// =======================
+const champsManquants = Array.from(champsSet);
+if (champsManquants.length > 0) {
+  afficherPopupChampsManquants(champsManquants);
+}
+
+
+  /* =======================
+     3. CONSTRUCTION RÉSUMÉ
+     ======================= */
 
   const resume = `
 Feuille de route : ${jour} ${dateFormatted} — ${nomRando}
@@ -1054,14 +1144,22 @@ L'animateur-trice se réserve le droit de modifier le circuit.
 ÉQUIPEMENT : Les chaussures de randonnée montantes et les bâtons de marche sont obligatoires. 
 Prévoir des vêtements de protection (vent, pluie, froid), un sac à dos avec pique-nique et de l'eau en quantité suffisante, ainsi que sa propre pharmacie.
 `.trim();
+// === POPUP INFORMATIF (non bloquant) ===
+if (champsManquants.length > 0) {
+  afficherPopupChampsManquants(champsManquants);
+}
 
 
-  const resultatDiv = document.getElementById("resultat");
-  if(!resultatDiv){ alert("Erreur : conteneur du résumé introuvable."); return; }
-  // resultatDiv.innerHTML = resume;
+  /* =======================
+     4. AFFICHAGE
+     ======================= */
+    const resultatDiv = document.getElementById("resultat");
+  if (!resultatDiv) {
+    alert("Erreur : conteneur du résumé introuvable");
+    return;
+  }
+
   resultatDiv.innerHTML = resume.replace(/\n/g, "<br>");
-
-  // accessible : focus sur résultat
   resultatDiv.focus?.();
 }
 
@@ -1198,7 +1296,31 @@ if (!image) {
 
   alert("Mail envoyé avec la courbe en pièce jointe ✅");
 }
+/* =========================
+   POPUP CHAMPS MANQUANTS
+   ========================= */
 
+function afficherPopupChampsManquants(champs) {
+  const popup = document.getElementById("popup-missing");
+  const list = document.getElementById("missing-list");
+
+  if (!popup || !list) return;
+
+  list.innerHTML = "";
+
+  champs.forEach(champ => {
+    const li = document.createElement("li");
+    li.textContent = champ;
+    list.appendChild(li);
+  });
+
+  popup.style.display = "flex";
+}
+
+function fermerPopupMissing() {
+  const popup = document.getElementById("popup-missing");
+  if (popup) popup.style.display = "none";
+}
 
 </script>
 
@@ -1427,6 +1549,12 @@ function weatherLabel(code){
   if(code >= 95) return "⛈️ Orage";
   return "🌥️ Variable";
 }
+      function directionVent(deg) {
+  if (deg === null || deg === undefined) return "N/D";
+  const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE",
+                "S","SSO","SO","OSO","O","ONO","NO","NNO"];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
 function formatDateFR(dateStr){
   const d = new Date(dateStr);
   return d.toLocaleDateString("fr-FR");
@@ -1436,18 +1564,21 @@ function updateOpenMeteo(lat, lon){
   window.meteoJourRando = null;
 
   const url =
-    "https://api.open-meteo.com/v1/forecast" +
-    `?latitude=${lat}&longitude=${lon}` +
-    "&daily=temperature_2m_max,temperature_2m_min," +
-    "precipitation_sum,precipitation_probability_max,weathercode," +
-    "windspeed_10m_max,windgusts_10m_max" +
-    "&forecast_days=7" +
-    "&timezone=Europe/Paris";
+  "https://api.open-meteo.com/v1/forecast" +
+  `?latitude=${lat}&longitude=${lon}` +
+  "&daily=temperature_2m_max,temperature_2m_min," +
+  "precipitation_probability_max,weathercode," +
+  "windspeed_10m_max,winddirection_10m_dominant,windgusts_10m_max" +
+  "&forecast_days=7" +
+  "&timezone=Europe/Paris";
 
   fetch(url)
     .then(r => r.json())
     .then(data => {
-
+  if (!data || !data.daily || !Array.isArray(data.daily.time)) {
+  console.error("Réponse Open-Meteo invalide :", data);
+  return;
+}
       const bloc = document.getElementById("meteo-openmeteo");
       if(!bloc) return;
 
@@ -1457,6 +1588,7 @@ function updateOpenMeteo(lat, lon){
       const dateRando = getDateRando();
 
       window.meteoJourRando = null;
+
 
       data.daily.time.forEach((day, i) => {
 
@@ -1471,6 +1603,7 @@ function updateOpenMeteo(lat, lon){
         const vent = data.daily.windspeed_10m_max?.[i];
         const rafales = data.daily.windgusts_10m_max?.[i];
         const label = weatherLabel(data.daily.weathercode?.[i]);
+        const ventDir = data.daily.winddirection_10m_dominant?.[i] ?? null;
 
         // sauvegarde jour de rando
         if(isRandoDay){
@@ -1481,16 +1614,17 @@ function updateOpenMeteo(lat, lon){
             tmax,
             pluie,
             vent,
-            rafales
+            rafales,
+            ventDir   // 👈 AJOUTER
           };
         }
 
         html += `
           <li class="${cls}">
             <b>${formatDateFR(day)}</b> ● ${label}
-            ● ${tmin ?? "—"}°C / ${tmax ?? "—"}°C
             ● ☔ ${pluie ?? "—"} %
-            ● 💨 ${vent ?? "—"} km/h
+            ● ${tmin ?? "—"}°C / ${tmax ?? "—"}°C
+            ● 💨 ${vent ?? "—"} km/h${ventDir !== null ? ` (${directionVent(ventDir)})` : ""}
             ● 🌪 ${rafales ?? "—"} km/h
           </li>`;
       });
@@ -1650,14 +1784,15 @@ $(function(){
       processData: false
     })
     .done(function(data){
-
   console.log("Réponse IBP brute :", data);
 
   exploiterIBP(data);
 
-  $("#gpx-status").text("✅ GPX analysé avec succès");
+  window.gpxImporte = true; // ✅ GPX bien analysé
 
+  $("#gpx-status").text("✅ GPX analysé avec succès");
 })
+
 
     .fail(err=>{
       console.error("Erreur IBPindex:", err);
@@ -1824,6 +1959,27 @@ function haversine(lat1, lon1, lat2, lon2) {
 
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
+  function afficherPopupChampsManquants(champs) {
+    const popup = document.getElementById("popup-missing");
+    const list = document.getElementById("missing-list");
+
+    if (!popup || !list) return;
+
+    list.innerHTML = "";
+
+    champs.forEach(champ => {
+      const li = document.createElement("li");
+      li.textContent = champ;
+      list.appendChild(li);
+    });
+
+    popup.style.display = "flex";
+  }
+
+  function fermerPopupMissing() {
+    const popup = document.getElementById("popup-missing");
+    if (popup) popup.style.display = "none";
+  }
 </script>
 <script>
 function minutesToHHMM(totalMinutes){
@@ -2080,6 +2236,39 @@ window.addEventListener("resize", () => {
   }
 });
 </script>
+
+<!-- POPUP CHAMPS MANQUANTS -->
+<div id="popup-missing" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(100,100,100,0.4);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    background:#de1062;
+    color:#000;
+    padding:20px 25px;
+    border-radius:18px;
+    max-width:420px;
+    width:90%;
+  ">
+    <h4 style="margin-top:0;text-align:center;">
+      ⚠️ POUR INFO: Les champs suivants ne sont pas renseignés ! 
+    </h4>
+
+    <ul id="missing-list" style="text-align:left; padding-left:20px;"></ul>
+
+    <div style="text-align:center;margin-top:12px;">
+      <h4 style="margin-top:0;text-align:center;">
+      Remplissez les champs manquants & poursuivez votre FdR en cliquant ⬇️
+    </h4>
+      <button onclick="fermerPopupMissing()">J'ai compris</button>
+    </div>
+  </div>
+</div>
 
 
 </body>
